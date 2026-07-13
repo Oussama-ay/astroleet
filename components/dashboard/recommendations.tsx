@@ -12,7 +12,7 @@ const STYLE: Record<
   Recommendation["severity"],
   { bg: string; fg: string; label: string; icon: React.ReactNode }
 > = {
-  high: { bg: "#F6E3D6", fg: "#A85E14", label: "Priority", icon: <PriorityHighIcon sx={{ fontSize: 18 }} /> },
+  high: { bg: "#2B1A12", fg: "#F0B36D", label: "Priority", icon: <PriorityHighIcon sx={{ fontSize: 18 }} /> },
   medium: { bg: colors.blueSoft, fg: colors.blueDark, label: "Watch", icon: <WarningAmberIcon sx={{ fontSize: 18 }} /> },
   info: { bg: colors.greenSoft, fg: colors.greenDark, label: "Guidance", icon: <InfoOutlinedIcon sx={{ fontSize: 18 }} /> },
 }
@@ -41,16 +41,16 @@ export default function Recommendations({ region }: { region: Region }) {
                 display: "flex",
                 gap: 1.75,
                 p: 2,
-                borderRadius: 2.5,
+                borderRadius: 0,
                 border: `1px solid ${colors.line}`,
-                bgcolor: "background.paper",
+                bgcolor: "#0D1012",
               }}
             >
               <Box
                 sx={{
                   width: 34,
                   height: 34,
-                  borderRadius: 2,
+                  borderRadius: 0,
                   flexShrink: 0,
                   display: "flex",
                   alignItems: "center",
@@ -85,7 +85,7 @@ export default function Recommendations({ region }: { region: Region }) {
                     bgcolor: colors.sandSoft,
                     px: 1,
                     py: 0.4,
-                    borderRadius: 1,
+                    borderRadius: 0,
                     border: `1px solid ${colors.line}`,
                   }}
                 >

@@ -43,12 +43,12 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
     <Box sx={{ position: "relative" }}>
       <Box
         sx={{
-          borderRadius: 3,
+          borderRadius: 0,
           overflow: "hidden",
-          bgcolor: "#EEF3F1",
+          bgcolor: "#050607",
           border: `1px solid ${colors.line}`,
           backgroundImage:
-            "linear-gradient(rgba(15,95,166,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(15,95,166,0.06) 1px, transparent 1px)",
+            "linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)",
           backgroundSize: "30px 30px",
         }}
       >
@@ -63,7 +63,7 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
           <Geographies geography={geoData as object}>
             {({ geographies }) =>
               geographies.map((geo) => {
-                const name: string = geo.properties.name
+                const name = String(geo.properties.name)
                 const region = regionByName(name)
                 const value = region ? metricsForRegion(region)[metric] : def.min
                 const isSelected = name === selected
@@ -79,7 +79,7 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
                     style={{
                       default: {
                         fill,
-                        stroke: isSelected ? colors.ink : "rgba(22,36,44,0.35)",
+                        stroke: isSelected ? colors.white : "rgba(255,255,255,0.38)",
                         strokeWidth: isSelected ? 2 : 0.8,
                         outline: "none",
                         cursor: "pointer",
@@ -87,12 +87,12 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
                       },
                       hover: {
                         fill,
-                        stroke: colors.ink,
+                        stroke: colors.white,
                         strokeWidth: 1.8,
                         outline: "none",
                         cursor: "pointer",
                       },
-                      pressed: { fill, stroke: colors.ink, strokeWidth: 2, outline: "none" },
+                      pressed: { fill, stroke: colors.white, strokeWidth: 2, outline: "none" },
                     }}
                   />
                 )
@@ -106,8 +106,8 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
               <Marker key={r.name} coordinates={[r.lon, r.lat]}>
                 <circle
                   r={active ? 5 : 2.6}
-                  fill={active ? colors.ink : "rgba(22,36,44,0.55)"}
-                  stroke="#FBFBF7"
+                  fill={active ? colors.white : "rgba(255,255,255,0.64)"}
+                  stroke="#050607"
                   strokeWidth={active ? 1.6 : 0.9}
                   style={{ cursor: "pointer" }}
                   onClick={() => onSelect(r.name)}
@@ -120,9 +120,9 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
                       fontFamily: "var(--font-mono), monospace",
                       fontSize: 13,
                       fontWeight: 700,
-                      fill: colors.ink,
+                      fill: colors.white,
                       paintOrder: "stroke",
-                      stroke: "#FBFBF7",
+                      stroke: "#050607",
                       strokeWidth: 3,
                     }}
                   >
@@ -149,8 +149,9 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
                 left: 12,
                 px: 1.75,
                 py: 1,
-                borderRadius: 2,
-                bgcolor: "rgba(22,36,44,0.92)",
+                borderRadius: 0,
+                bgcolor: "rgba(5,6,7,0.94)",
+                border: `1px solid ${colors.line}`,
                 color: "#EAF2EF",
                 pointerEvents: "none",
                 maxWidth: 240,
@@ -183,7 +184,7 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
             sx={{
               width: 160,
               height: 10,
-              borderRadius: 5,
+              borderRadius: 0,
               background: `linear-gradient(90deg, ${stops.join(", ")})`,
               border: `1px solid ${colors.line}`,
             }}

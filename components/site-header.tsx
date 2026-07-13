@@ -14,9 +14,7 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  useMediaQuery,
 } from "@mui/material"
-import { useTheme } from "@mui/material/styles"
 import MenuIcon from "@mui/icons-material/Menu"
 import { Logo } from "./logo"
 
@@ -28,23 +26,31 @@ const NAV = [
 
 export default function SiteHeader() {
   const pathname = usePathname()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
   const [open, setOpen] = React.useState(false)
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href)
 
   return (
-    <AppBar position="sticky" elevation={0}>
+    <AppBar
+      position="absolute"
+      elevation={0}
+      sx={{
+        bgcolor: "transparent",
+        backgroundImage: "none",
+        backdropFilter: "none",
+        borderBottom: "1px solid rgba(255,255,255,0.18)",
+        color: "#fff",
+        zIndex: (currentTheme) => currentTheme.zIndex.appBar,
+      }}
+    >
       <Container maxWidth="lg">
         <Toolbar disableGutters sx={{ minHeight: 68, gap: 2 }}>
           <Box component={Link} href="/" sx={{ display: "flex", alignItems: "center", textDecoration: "none", color: "inherit", flexGrow: 1 }}>
-            <Logo />
+            <Logo light />
           </Box>
 
-          {!isMobile && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 0.5 }}>
               {NAV.map((item) => (
                 <Button
                   key={item.href}
@@ -52,9 +58,9 @@ export default function SiteHeader() {
                   href={item.href}
                   disableRipple
                   sx={{
-                    color: isActive(item.href) ? "primary.main" : "text.secondary",
+                    color: isActive(item.href) ? "#fff" : "rgba(255,255,255,0.64)",
                     fontWeight: isActive(item.href) ? 700 : 500,
-                    "&:hover": { backgroundColor: "transparent", color: "primary.main" },
+                    "&:hover": { backgroundColor: "transparent", color: "#fff" },
                   }}
                 >
                   {item.label}
@@ -64,18 +70,29 @@ export default function SiteHeader() {
                 component={Link}
                 href="/dashboard"
                 variant="contained"
-                sx={{ ml: 1 }}
+                sx={{
+                  ml: 1,
+                  borderRadius: 0,
+                  bgcolor: "#fff",
+                  color: "#050607",
+                  textTransform: "uppercase",
+                  fontSize: "0.72rem",
+                  letterSpacing: "0.08em",
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.84)" },
+                }}
               >
                 Open dashboard
               </Button>
-            </Box>
-          )}
+          </Box>
 
-          {isMobile && (
-            <IconButton edge="end" onClick={() => setOpen(true)} aria-label="Open navigation menu">
-              <MenuIcon />
-            </IconButton>
-          )}
+          <IconButton
+            edge="end"
+            onClick={() => setOpen(true)}
+            aria-label="Open navigation menu"
+            sx={{ display: { xs: "inline-flex", md: "none" }, color: "#fff" }}
+          >
+            <MenuIcon />
+          </IconButton>
         </Toolbar>
       </Container>
 

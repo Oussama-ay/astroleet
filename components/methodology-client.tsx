@@ -109,18 +109,47 @@ export default function MethodologyClient() {
   return (
     <PageShell>
       {/* Intro */}
-      <Box sx={{ borderBottom: `1px solid ${colors.line}`, bgcolor: "background.paper" }}>
-        <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
+      <Box
+        component="section"
+        sx={{
+          position: "relative",
+          minHeight: { xs: 560, md: 510 },
+          display: "flex",
+          alignItems: "flex-end",
+          borderBottom: `1px solid ${colors.line}`,
+          bgcolor: "#090B0C",
+          backgroundImage: "url('/images/methodology-atlas-background.png')",
+          backgroundSize: "cover",
+          backgroundPosition: { xs: "64% center", md: "center 48%" },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(180deg, rgba(5,6,7,0.16) 0%, rgba(5,6,7,0.38) 42%, rgba(5,6,7,0.96) 100%), linear-gradient(90deg, rgba(5,6,7,0.84) 0%, rgba(5,6,7,0.14) 76%)",
+          },
+        }}
+      >
+        <Container
+          maxWidth="lg"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            pt: { xs: 11, md: 0 },
+            pb: { xs: 5, md: 6 },
+          }}
+        >
           <Chip
             icon={<SatelliteAltIcon sx={{ fontSize: 16 }} />}
             label="Methodology & data sources"
             size="small"
-            sx={{ bgcolor: colors.blueSoft, color: colors.blueDark, mb: 2, "& .MuiChip-icon": { color: colors.blueDark } }}
+            variant="outlined"
+            sx={{ borderColor: "rgba(255,255,255,0.34)", color: "rgba(255,255,255,0.76)", mb: 2, "& .MuiChip-icon": { color: colors.blue } }}
           />
-          <Typography variant="h2" sx={{ fontSize: { xs: "2.1rem", md: "2.8rem" }, maxWidth: 760 }}>
+          <Typography component="h1" variant="h2" sx={{ fontSize: { xs: "2.3rem", md: "4rem" }, maxWidth: 880, textTransform: "uppercase", lineHeight: 1 }}>
             Transparent by design, verifiable by default.
           </Typography>
-          <Typography variant="h6" sx={{ mt: 2.5, fontWeight: 400, color: "text.secondary", maxWidth: 680, lineHeight: 1.6 }}>
+          <Typography variant="h6" sx={{ mt: 2.5, fontWeight: 400, color: "rgba(255,255,255,0.72)", maxWidth: 680, lineHeight: 1.6 }}>
             Astroleat combines multiple open Earth-observation missions into consistent
             regional indicators. Every value can be traced back to its sensor, processing step
             and known limitations.
@@ -128,21 +157,32 @@ export default function MethodologyClient() {
         </Container>
       </Box>
 
+      <Box
+        component="section"
+        sx={{
+          backgroundImage:
+            "linear-gradient(rgba(5,6,7,0.91), rgba(5,6,7,0.95)), url('/images/methodology-atlas-background.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center center",
+          backgroundAttachment: { xs: "scroll", md: "fixed" },
+          borderBottom: `1px solid ${colors.line}`,
+        }}
+      >
       <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
         {/* Metric definitions */}
         <SectionHeading icon={<LayersIcon />} overline="Indicators" title="What each metric means" />
         <Grid container spacing={3} sx={{ mb: 8 }}>
           {METRIC_DOCS.map((m) => (
             <Grid size={{ xs: 12, md: 4 }} key={m.title}>
-              <Card sx={{ p: 3, height: "100%", borderTop: `4px solid ${m.color}` }}>
+              <Card sx={{ p: 3, height: "100%", borderTop: `3px solid ${m.color}`, bgcolor: "#090B0C" }}>
                 <Typography variant="h6">{m.title}</Typography>
                 <Box
                   sx={{
                     my: 1.5,
                     px: 1.25,
                     py: 0.75,
-                    borderRadius: 1.5,
-                    bgcolor: colors.sandSoft,
+                    borderRadius: 0,
+                    bgcolor: "#050607",
                     border: `1px solid ${colors.line}`,
                     fontFamily: "var(--font-mono)",
                     fontSize: 13,
@@ -164,7 +204,7 @@ export default function MethodologyClient() {
         <Grid container spacing={3} sx={{ mb: 8 }}>
           {PIPELINE.map((p) => (
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={p.step}>
-              <Box sx={{ height: "100%", p: 2.5, borderRadius: 3, border: `1px solid ${colors.line}`, bgcolor: "background.paper" }}>
+              <Box sx={{ height: "100%", p: 2.5, borderRadius: 0, border: `1px solid ${colors.line}`, bgcolor: "#090B0C" }}>
                 <Typography
                   variant="h5"
                   sx={{ fontFamily: "var(--font-mono)", color: "primary.main", fontWeight: 700 }}
@@ -184,11 +224,11 @@ export default function MethodologyClient() {
 
         {/* Data sources table */}
         <SectionHeading icon={<SatelliteAltIcon />} overline="Provenance" title="Data sources" />
-        <Card sx={{ mb: 8, overflow: "hidden" }}>
+        <Card sx={{ mb: 8, overflow: "hidden", bgcolor: "#090B0C" }}>
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: colors.sandSoft }}>
+                <TableRow sx={{ bgcolor: "#111416" }}>
                   <TableCell sx={{ fontWeight: 700 }}>Source</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Provider</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Used for</TableCell>
@@ -212,14 +252,14 @@ export default function MethodologyClient() {
         </Card>
 
         {/* Uncertainty */}
-        <Card sx={{ p: { xs: 3, md: 4 }, bgcolor: colors.greenSoft, border: `1px solid ${colors.green}33` }}>
+        <Card sx={{ p: { xs: 3, md: 4 }, bgcolor: "#0C1713", border: `1px solid ${colors.green}55` }}>
           <Stack direction="row" spacing={1.5} sx={{ mb: 1, alignItems: "center" }}>
             <VerifiedOutlinedIcon sx={{ color: colors.greenDark }} />
-            <Typography variant="h6" sx={{ color: colors.greenDark }}>
+            <Typography variant="h6" sx={{ color: colors.greenDark, textTransform: "uppercase" }}>
               Uncertainty & responsible use
             </Typography>
           </Stack>
-          <Typography variant="body2" sx={{ color: colors.ink, lineHeight: 1.7, maxWidth: 820 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.7, maxWidth: 820 }}>
             Satellite retrievals carry uncertainty from atmospheric conditions, sensor
             calibration, mixed pixels and interpolation. Regional aggregates mask
             within-region variability. Astroleat is intended for situational awareness and
@@ -235,6 +275,7 @@ export default function MethodologyClient() {
           reference publicly documented mission specifications.
         </Typography>
       </Container>
+      </Box>
     </PageShell>
   )
 }
@@ -256,7 +297,7 @@ function SectionHeading({
           {overline}
         </Typography>
       </Stack>
-      <Typography variant="h4" sx={{ mt: 0.5 }}>
+      <Typography variant="h4" sx={{ mt: 0.5, textTransform: "uppercase", letterSpacing: 0 }}>
         {title}
       </Typography>
     </Box>

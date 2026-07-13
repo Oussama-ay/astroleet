@@ -71,7 +71,9 @@ export default function HistoryChart({ region, metric }: Props) {
           sx={{
             "& .MuiAreaElement-root": { fill: stroke, fillOpacity: 0.12 },
             "& .MuiLineElement-root": { strokeWidth: 2.5 },
-            "& .MuiMarkElement-root": { fill: "#fff", stroke, strokeWidth: 2, r: 3.5 },
+            "& .MuiMarkElement-root": { fill: "#090B0C", stroke, strokeWidth: 2, r: 3.5 },
+            "& .MuiChartsGrid-line": { stroke: colors.line },
+            "& .MuiChartsAxis-line, & .MuiChartsAxis-tick": { stroke: colors.line },
           }}
         />
       </Box>

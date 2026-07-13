@@ -57,7 +57,7 @@ export default function LocationControls({ region, metric, onRegionChange, onMet
             "& .MuiToggleButton-root": {
               justifyContent: "flex-start",
               textTransform: "none",
-              borderRadius: "10px !important",
+              borderRadius: "0 !important",
               border: `1px solid ${colors.line} !important`,
               px: 1.5,
               py: 1,
@@ -65,7 +65,7 @@ export default function LocationControls({ region, metric, onRegionChange, onMet
             },
             "& .Mui-selected": {
               bgcolor: `${colors.blueSoft} !important`,
-              color: `${colors.blueDark} !important`,
+              color: `${colors.white} !important`,
               borderColor: `${colors.blue} !important`,
             },
           }}

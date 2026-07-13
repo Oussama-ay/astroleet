@@ -55,6 +55,7 @@ export default function MetricCards({ region, active, onSelect }: Props) {
                 borderWidth: isActive ? 2 : 1,
                 position: "relative",
                 overflow: "hidden",
+                bgcolor: "#090B0C",
               }}
             >
               <CardActionArea onClick={() => onSelect(key)} sx={{ p: 2.5, height: "100%" }}>
@@ -73,7 +74,7 @@ export default function MetricCards({ region, active, onSelect }: Props) {
                     sx={{
                       width: 40,
                       height: 40,
-                      borderRadius: 2,
+                      borderRadius: 0,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -90,9 +91,9 @@ export default function MetricCards({ region, active, onSelect }: Props) {
                       alignItems: "center",
                       px: 1,
                       py: 0.25,
-                      borderRadius: 5,
-                      bgcolor: positive ? colors.greenSoft : "#F6E3D6",
-                      color: positive ? colors.greenDark : "#A85E14",
+                      borderRadius: 0,
+                      bgcolor: positive ? colors.greenSoft : "#2B1A12",
+                      color: positive ? colors.greenDark : "#F0B36D",
                     }}
                   >
                     {delta >= 0 ? (

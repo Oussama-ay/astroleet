@@ -6,7 +6,7 @@ import { Logo } from "./logo"
 
 export default function SiteFooter() {
   return (
-    <Box component="footer" sx={{ mt: "auto", backgroundColor: "#16242C", color: "#CBD5D1" }}>
+    <Box component="footer" sx={{ mt: "auto", backgroundColor: "#050607", color: "#CBD5D1", borderTop: "1px solid #2A3034" }}>
       <Container maxWidth="lg" sx={{ py: { xs: 5, md: 6 } }}>
         <Stack
           direction={{ xs: "column", md: "row" }}
@@ -36,7 +36,8 @@ export default function SiteFooter() {
         <Divider sx={{ my: 4, borderColor: "rgba(255,255,255,0.1)" }} />
         <Typography variant="caption" sx={{ color: "#7E918F" }}>
           © {new Date().getFullYear()} Astroleat. Demonstration data derived from open Earth
-          observation sources for illustrative purposes.
+          observation sources for illustrative purposes. Homepage aerial footage by Taryn
+          Elliott via Pexels.
         </Typography>
       </Container>
     </Box>

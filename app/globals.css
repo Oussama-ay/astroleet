@@ -7,7 +7,7 @@ html,
 body {
   padding: 0;
   margin: 0;
-  background-color: #f6f1e7;
+  background-color: #050607;
 }
 
 * {
@@ -16,4 +16,49 @@ body {
 
 a {
   color: inherit;
+}
+
+.hero-action::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 240ms ease;
+}
+
+.hero-action:hover::before,
+.hero-action:focus-visible::before {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.scroll-cue > div {
+  animation: scroll-cue 2.1s ease-in-out infinite;
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-24px);
+  }
+  60%,
+  100% {
+    transform: translateY(58px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-video {
+    display: none;
+  }
+
+  .scroll-cue > div {
+    animation: none;
+    transform: translateY(20px);
+  }
+
+  .hero-action::before {
+    transition: none;
+  }
 }
