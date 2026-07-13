@@ -47,7 +47,7 @@ export function Logo({ light = false }: { light?: boolean }) {
             whiteSpace: "nowrap",
         }}
       >
-          Astro<Box component="span" sx={{ color: "#DCEAF5" }}>leat</Box>
+          Astro<Box component="span" sx={{ color: "#DCEAF5" }}>leet</Box>
       </Typography>
       </Box>
     </Box>

@@ -18,9 +18,9 @@ const plexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Astroleat — Environmental Monitoring for Morocco',
+  title: 'Astroleet — Environmental Monitoring for Morocco',
   description:
-    'Astroleat turns satellite Earth observation into trustworthy, evidence-based environmental intelligence for Morocco: vegetation, soil moisture and land surface temperature.',
+    'Astroleet turns satellite Earth observation into trustworthy, evidence-based environmental intelligence for Morocco: vegetation, soil moisture and land surface temperature.',
   generator: 'v0.app',
 }
 

@@ -150,7 +150,7 @@ export default function MethodologyClient() {
             Transparent by design, verifiable by default.
           </Typography>
           <Typography variant="h6" sx={{ mt: 2.5, fontWeight: 400, color: "rgba(255,255,255,0.72)", maxWidth: 680, lineHeight: 1.6 }}>
-            Astroleat combines multiple open Earth-observation missions into consistent
+            Astroleet combines multiple open Earth-observation missions into consistent
             regional indicators. Every value can be traced back to its sensor, processing step
             and known limitations.
           </Typography>
@@ -262,7 +262,7 @@ export default function MethodologyClient() {
           <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.7, maxWidth: 820 }}>
             Satellite retrievals carry uncertainty from atmospheric conditions, sensor
             calibration, mixed pixels and interpolation. Regional aggregates mask
-            within-region variability. Astroleat is intended for situational awareness and
+            within-region variability. Astroleet is intended for situational awareness and
             planning; operational decisions should be validated against in-situ measurements
             and local expertise. The values shown in this demonstration are synthesised to
             reflect Morocco&apos;s north–south aridity gradient and are not live observations.

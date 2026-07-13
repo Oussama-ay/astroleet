@@ -125,7 +125,7 @@ export default function HomePage() {
                 textShadow: "0 2px 24px rgba(0,0,0,0.32)",
               }}
             >
-              Morocco, from orbit.
+              Morocco from orbit.
             </Typography>
             <Typography
               sx={{

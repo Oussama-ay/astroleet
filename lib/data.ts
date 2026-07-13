@@ -1,4 +1,4 @@
-// Deterministic mock environmental data for Astroleat.
+// Deterministic mock environmental data for Astroleet.
 // Values are synthesised from a seeded generator so the dashboard is stable
 // across renders while remaining representative of Moroccan agro-climatic zones.
 

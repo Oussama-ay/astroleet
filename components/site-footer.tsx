@@ -35,7 +35,7 @@ export default function SiteFooter() {
         </Stack>
         <Divider sx={{ my: 4, borderColor: "rgba(255,255,255,0.1)" }} />
         <Typography variant="caption" sx={{ color: "#7E918F" }}>
-          © {new Date().getFullYear()} Astroleat. Demonstration data derived from open Earth
+          © {new Date().getFullYear()} Astroleet. Demonstration data derived from open Earth
           observation sources for illustrative purposes. Homepage aerial footage by Taryn
           Elliott via Pexels.
         </Typography>
