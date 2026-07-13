@@ -48,7 +48,7 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-video {
+  .background-video {
     display: none;
   }
 

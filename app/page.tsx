@@ -13,6 +13,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import GrassIcon from "@mui/icons-material/Grass"
 import WaterDropIcon from "@mui/icons-material/WaterDrop"
 import ThermostatIcon from "@mui/icons-material/Thermostat"
+import BackgroundVideo from "@/components/background-video"
 import PageShell from "@/components/page-shell"
 import { colors } from "@/lib/theme"
 
@@ -55,28 +56,11 @@ export default function HomePage() {
           color: "#fff",
         }}
       >
-        <Box
-          component="video"
-          className="hero-video"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
+        <BackgroundVideo
+          src="/videos/morocco-aerial.mp4"
           poster="/images/morocco-satellite.png"
-          aria-hidden="true"
-          sx={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: { xs: "58% center", md: "center center" },
-            zIndex: 0,
-          }}
-        >
-          <source src="/videos/morocco-aerial.mp4" type="video/mp4" />
-        </Box>
+          objectPosition={{ xs: "58% center", md: "center center" }}
+        />
 
         <Box
           aria-hidden="true"
@@ -231,18 +215,41 @@ export default function HomePage() {
       <Box
         component="section"
         sx={{
+          position: "relative",
+          overflow: "clip",
           bgcolor: "#090B0C",
           color: colors.ink,
-          py: { xs: 8, md: 12 },
           borderTop: `1px solid ${colors.line}`,
-          backgroundImage:
-            "linear-gradient(rgba(5,6,7,0.88), rgba(5,6,7,0.94)), url('/images/methodology-atlas-background.png')",
+          backgroundImage: "url('/images/methodology-atlas-background.png')",
           backgroundSize: "cover",
           backgroundPosition: "center center",
-          backgroundAttachment: { xs: "scroll", md: "fixed" },
         }}
       >
-        <Container maxWidth="lg">
+        <Box
+          aria-hidden="true"
+          sx={{
+            position: "sticky",
+            top: 0,
+            height: "100svh",
+            mb: "-100svh",
+            overflow: "hidden",
+            pointerEvents: "none",
+          }}
+        >
+          <BackgroundVideo
+            src="/videos/methodology-morocco.mp4"
+            poster="/images/methodology-atlas-background.png"
+            objectPosition={{ xs: "60% center", md: "center center" }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(180deg, rgba(5,6,7,0.87), rgba(5,6,7,0.94))",
+            }}
+          />
+        </Box>
+        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, py: { xs: 8, md: 12 } }}>
           <Grid container spacing={{ xs: 5, md: 8 }}>
             <Grid size={{ xs: 12, md: 5 }}>
               <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.12em" }}>

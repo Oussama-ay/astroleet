@@ -20,6 +20,7 @@ import SatelliteAltIcon from "@mui/icons-material/SatelliteAlt"
 import LayersIcon from "@mui/icons-material/Layers"
 import RuleIcon from "@mui/icons-material/Rule"
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined"
+import BackgroundVideo from "@/components/background-video"
 import PageShell from "@/components/page-shell"
 import { colors } from "@/lib/theme"
 
@@ -116,6 +117,7 @@ export default function MethodologyClient() {
           minHeight: { xs: 560, md: 510 },
           display: "flex",
           alignItems: "flex-end",
+          overflow: "hidden",
           borderBottom: `1px solid ${colors.line}`,
           bgcolor: "#090B0C",
           backgroundImage: "url('/images/methodology-atlas-background.png')",
@@ -125,16 +127,22 @@ export default function MethodologyClient() {
             content: '""',
             position: "absolute",
             inset: 0,
+            zIndex: 1,
             background:
               "linear-gradient(180deg, rgba(5,6,7,0.16) 0%, rgba(5,6,7,0.38) 42%, rgba(5,6,7,0.96) 100%), linear-gradient(90deg, rgba(5,6,7,0.84) 0%, rgba(5,6,7,0.14) 76%)",
           },
         }}
       >
+        <BackgroundVideo
+          src="/videos/methodology-morocco.mp4"
+          poster="/images/methodology-atlas-background.png"
+          objectPosition={{ xs: "62% center", md: "center 48%" }}
+        />
         <Container
           maxWidth="lg"
           sx={{
             position: "relative",
-            zIndex: 1,
+            zIndex: 2,
             pt: { xs: 11, md: 0 },
             pb: { xs: 5, md: 6 },
           }}
@@ -160,15 +168,40 @@ export default function MethodologyClient() {
       <Box
         component="section"
         sx={{
-          backgroundImage:
-            "linear-gradient(rgba(5,6,7,0.91), rgba(5,6,7,0.95)), url('/images/methodology-atlas-background.png')",
+          position: "relative",
+          overflow: "clip",
+          bgcolor: "#050607",
+          backgroundImage: "url('/images/methodology-atlas-background.png')",
           backgroundSize: "cover",
           backgroundPosition: "center center",
-          backgroundAttachment: { xs: "scroll", md: "fixed" },
           borderBottom: `1px solid ${colors.line}`,
         }}
       >
-      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 8 } }}>
+      <Box
+        aria-hidden="true"
+        sx={{
+          position: "sticky",
+          top: 0,
+          height: "100svh",
+          mb: "-100svh",
+          overflow: "hidden",
+          pointerEvents: "none",
+        }}
+      >
+        <BackgroundVideo
+          src="/videos/methodology-morocco.mp4"
+          poster="/images/methodology-atlas-background.png"
+          objectPosition={{ xs: "58% center", md: "center center" }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(180deg, rgba(5,6,7,0.89), rgba(5,6,7,0.95))",
+          }}
+        />
+      </Box>
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, py: { xs: 6, md: 8 } }}>
         {/* Metric definitions */}
         <SectionHeading icon={<LayersIcon />} overline="Indicators" title="What each metric means" />
         <Grid container spacing={3} sx={{ mb: 8 }}>

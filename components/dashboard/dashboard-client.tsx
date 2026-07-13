@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Box, Container, Typography, Grid, Card, Chip, Stack, Divider } from "@mui/material"
 import PublicIcon from "@mui/icons-material/Public"
+import BackgroundVideo from "@/components/background-video"
 import PageShell from "@/components/page-shell"
 import { REGIONS, type MetricKey } from "@/lib/data"
 import { colors } from "@/lib/theme"
@@ -27,6 +28,8 @@ export default function DashboardClient() {
           minHeight: { xs: 330, md: 410 },
           display: "flex",
           alignItems: "flex-end",
+          overflow: "hidden",
+          bgcolor: "#050607",
           backgroundImage: "url('/images/dashboard-orbit-background.png')",
           backgroundSize: "cover",
           backgroundPosition: { xs: "58% center", md: "center 46%" },
@@ -35,12 +38,18 @@ export default function DashboardClient() {
             content: '""',
             position: "absolute",
             inset: 0,
+            zIndex: 1,
             background:
               "linear-gradient(180deg, rgba(5,6,7,0.18) 0%, rgba(5,6,7,0.34) 38%, rgba(5,6,7,0.94) 100%), linear-gradient(90deg, rgba(5,6,7,0.72) 0%, rgba(5,6,7,0.12) 72%)",
           },
         }}
       >
-        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, pb: { xs: 4, md: 5 } }}>
+        <BackgroundVideo
+          src="/videos/dashboard-morocco.mp4"
+          poster="/images/dashboard-orbit-background.png"
+          objectPosition={{ xs: "58% center", md: "center 52%" }}
+        />
+        <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2, pb: { xs: 4, md: 5 } }}>
         <Stack
           direction={{ xs: "column", sm: "row" }}
           spacing={2}
@@ -76,15 +85,40 @@ export default function DashboardClient() {
       <Box
         component="section"
         sx={{
-          backgroundImage:
-            "linear-gradient(rgba(5,6,7,0.90), rgba(5,6,7,0.94)), url('/images/dashboard-orbit-background.png')",
+          position: "relative",
+          overflow: "clip",
+          bgcolor: "#050607",
+          backgroundImage: "url('/images/dashboard-orbit-background.png')",
           backgroundSize: "cover",
           backgroundPosition: "center center",
-          backgroundAttachment: { xs: "scroll", md: "fixed" },
           borderBottom: `1px solid ${colors.line}`,
         }}
       >
-      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+      <Box
+        aria-hidden="true"
+        sx={{
+          position: "sticky",
+          top: 0,
+          height: "100svh",
+          mb: "-100svh",
+          overflow: "hidden",
+          pointerEvents: "none",
+        }}
+      >
+        <BackgroundVideo
+          src="/videos/dashboard-morocco.mp4"
+          poster="/images/dashboard-orbit-background.png"
+          objectPosition={{ xs: "60% center", md: "center center" }}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(180deg, rgba(5,6,7,0.88), rgba(5,6,7,0.94))",
+          }}
+        />
+      </Box>
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1, py: { xs: 4, md: 6 } }}>
         <Grid container spacing={3}>
           {/* Left: controls */}
           <Grid size={{ xs: 12, md: 3 }}>
