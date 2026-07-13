@@ -18,20 +18,19 @@ a {
   color: inherit;
 }
 
-.hero-action::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: #fff;
-  transform: scaleX(0);
-  transform-origin: right center;
-  transition: transform 240ms ease;
+.hero-action {
+  background-image: linear-gradient(#fff, #fff);
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: 0 100%;
+  transition: background-size 240ms ease, color 160ms ease;
 }
 
-.hero-action:hover::before,
-.hero-action:focus-visible::before {
-  transform: scaleX(1);
-  transform-origin: left center;
+.hero-action:hover,
+.hero-action:focus-visible {
+  color: #050607 !important;
+  background-position: left center;
+  background-size: 100% 100%;
 }
 
 .scroll-cue > div {
@@ -58,7 +57,7 @@ a {
     transform: translateY(20px);
   }
 
-  .hero-action::before {
+  .hero-action {
     transition: none;
   }
 }

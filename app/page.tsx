@@ -159,7 +159,6 @@ export default function HomePage() {
                   letterSpacing: "0.08em",
                   fontSize: "0.78rem",
                   "&:hover": { borderColor: "#fff", color: "#050607" },
-                  "& > *": { position: "relative", zIndex: 1 },
                 }}
               >
                 Explore Morocco
