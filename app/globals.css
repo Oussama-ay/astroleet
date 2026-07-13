@@ -1,0 +1,19 @@
+:root {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #f6f1e7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+}
