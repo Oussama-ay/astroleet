@@ -4,42 +4,52 @@ import { Box, Typography } from "@mui/material"
 
 export function Logo({ light = false }: { light?: boolean }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-      <Box
-        aria-hidden
-        sx={{
-          width: 30,
-          height: 30,
-          borderRadius: "50%",
-          position: "relative",
-          background: "linear-gradient(140deg, #0F5FA6 0%, #2E8B6B 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
+    <Box sx={{ display: "inline-flex", alignItems: "center", minWidth: 154 }}>
+      <Box sx={{ position: "relative", display: "inline-flex", pr: 1 }}>
         <Box
+          aria-hidden
           sx={{
-            width: 12,
-            height: 12,
-            borderRadius: "50% 50% 50% 0",
-            transform: "rotate(45deg)",
-            backgroundColor: "#E9DEC8",
+            position: "absolute",
+            top: -5,
+            right: -6,
+            width: 82,
+            height: 21,
+            borderTop: "2px solid #55A7E8",
+            borderRadius: "50%",
+            transform: "rotate(-8deg)",
+            opacity: 0.95,
+            pointerEvents: "none",
           }}
         />
-      </Box>
+        <Box
+          aria-hidden
+          sx={{
+            position: "absolute",
+            top: 1,
+            right: -7,
+            width: 3,
+            height: 3,
+            bgcolor: "#55A7E8",
+            transform: "rotate(45deg)",
+          }}
+        />
       <Typography
         component="span"
         sx={{
-          fontWeight: 700,
-          fontSize: "1.15rem",
-          letterSpacing: "-0.02em",
-          color: light ? "#F6F1E7" : "text.primary",
+            position: "relative",
+            zIndex: 1,
+            fontWeight: 800,
+            fontSize: { xs: "1rem", sm: "1.08rem" },
+            lineHeight: 1,
+            letterSpacing: "0.13em",
+            color: light ? "#FFFFFF" : "text.primary",
+            textTransform: "uppercase",
+            whiteSpace: "nowrap",
         }}
       >
-        Astroleat
+          Astro<Box component="span" sx={{ color: "#DCEAF5" }}>leat</Box>
       </Typography>
+      </Box>
     </Box>
   )
 }
