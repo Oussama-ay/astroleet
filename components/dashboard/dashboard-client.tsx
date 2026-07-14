@@ -12,13 +12,25 @@ import LocationControls from "./location-controls"
 import MetricCards from "./metric-cards"
 import HistoryChart from "./history-chart"
 import Recommendations from "./recommendations"
-import ClimateObservations from "./climate-observations"
+import ClimateObservations, { type ClimateLocation } from "./climate-observations"
 
 export default function DashboardClient() {
   const [regionName, setRegionName] = React.useState(REGIONS[6].name) // Marrakech-Safi
   const [metric, setMetric] = React.useState<MetricKey>("ndvi")
+  const [climatePoint, setClimatePoint] = React.useState<ClimateLocation | null>(null)
 
   const region = REGIONS.find((r) => r.name === regionName) ?? REGIONS[0]
+  const climateLocation: ClimateLocation = climatePoint ?? {
+    mode: "region",
+    label: `the ${region.name} regional centroid`,
+    latitude: region.lat,
+    longitude: region.lon,
+  }
+
+  function selectRegion(name: string) {
+    setRegionName(name)
+    setClimatePoint(null)
+  }
 
   return (
     <PageShell>
@@ -127,7 +139,7 @@ export default function DashboardClient() {
               <LocationControls
                 region={region}
                 metric={metric}
-                onRegionChange={setRegionName}
+                onRegionChange={selectRegion}
                 onMetricChange={setMetric}
               />
             </Card>
@@ -142,13 +154,17 @@ export default function DashboardClient() {
                   Select a region to inspect
                 </Typography>
               </Stack>
-              <MoroccoMap metric={metric} selected={regionName} onSelect={setRegionName} />
+              <MoroccoMap metric={metric} selected={regionName} onSelect={selectRegion} />
             </Card>
           </Grid>
 
           {/* Observed climate */}
           <Grid size={12}>
-            <ClimateObservations region={region} />
+            <ClimateObservations
+              key={`${climateLocation.mode}:${climateLocation.latitude}:${climateLocation.longitude}`}
+              location={climateLocation}
+              onLocationChange={setClimatePoint}
+            />
           </Grid>
 
           {/* Demonstration satellite indicators */}

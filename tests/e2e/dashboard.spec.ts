@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test"
 
 test("dashboard loads its core monitoring experience", async ({ page }) => {
+  const climateRequests: string[] = []
   await page.route("**/api/climate/power?**", async (route) => {
+    climateRequests.push(route.request().url())
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify(powerResponse),
@@ -24,6 +26,18 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   ).toBeVisible()
   await expect(page.getByLabel("Air temperature observed value")).toContainText("12.30°C")
   await expect(page.getByText("Cached observed data")).toBeVisible()
+  await page.getByLabel("Latitude").fill("91")
+  await expect(page.getByRole("button", { name: "Apply point" })).toBeDisabled()
+  await expect(page.getByText("Latitude must be a number between −90 and 90.")).toBeVisible()
+  await page.getByLabel("Latitude").fill("33.57")
+  await page.getByLabel("Longitude").fill("-7.59")
+  await page.getByRole("button", { name: "Apply point" }).click()
+  await expect(page.getByText("Monthly climate observations for Exact point 33.5700, -7.5900.")).toBeVisible()
+  await expect.poll(() => climateRequests.at(-1)).toContain("latitude=33.57&longitude=-7.59")
+  await page.getByRole("button", { name: "Use regional centroid" }).click()
+  await expect(
+    page.getByText("Monthly climate observations for the Marrakech-Safi regional centroid."),
+  ).toBeVisible()
   await expect(
     page.getByRole("heading", { name: "Demonstration satellite indicators" }),
   ).toBeVisible()
