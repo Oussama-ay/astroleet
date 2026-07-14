@@ -2,17 +2,20 @@
 
 import * as React from "react"
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
-import { geoMercator } from "d3-geo"
-import { Box, Typography, Stack } from "@mui/material"
+import { geoCircle, geoMercator, geoPath } from "d3-geo"
+import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
 import geoData from "@/lib/morocco-regions.json"
 import { METRICS, metricsForRegion, REGIONS, type MetricKey, formatMetric } from "@/lib/data"
+import type { DashboardClimateLocation } from "@/lib/domain/dashboard-share"
 import { colorFor, rampStops } from "@/lib/scale"
 import { colors } from "@/lib/theme"
 
 interface Props {
   metric: MetricKey
   selected: string
-  onSelect: (name: string) => void
+  location: DashboardClimateLocation
+  onRegionSelect: (name: string) => void
+  onPointSelect: (regionName: string, latitude: number, longitude: number) => void
 }
 
 const WIDTH = 800
@@ -26,6 +29,8 @@ const projection = geoMercator().fitExtent(
   ],
   geoData as never,
 )
+const pathGenerator = geoPath(projection)
+const EARTH_RADIUS_KM = 6_371
 
 function regionByName(name: string) {
   return REGIONS.find((r) => r.name === name)
@@ -33,8 +38,15 @@ function regionByName(name: string) {
 
 const subscribeToHydration = () => () => {}
 
-export default function MoroccoMap({ metric, selected, onSelect }: Props) {
+export default function MoroccoMap({
+  metric,
+  selected,
+  location,
+  onRegionSelect,
+  onPointSelect,
+}: Props) {
   const [hover, setHover] = React.useState<string | null>(null)
+  const [selectionMode, setSelectionMode] = React.useState<"region" | "point">("region")
   const mounted = React.useSyncExternalStore(
     subscribeToHydration,
     () => true,
@@ -42,9 +54,53 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
   )
   const def = METRICS[metric]
   const stops = rampStops(metric)
+  const radiusPath =
+    location.mode === "radius"
+      ? pathGenerator(
+          geoCircle()
+            .center([location.longitude, location.latitude])
+            .radius((location.radiusKm / EARTH_RADIUS_KM) * (180 / Math.PI))
+            .precision(2)(),
+        )
+      : null
+
+  function selectGeography(
+    event: React.MouseEvent<SVGPathElement>,
+    regionName: string,
+  ) {
+    if (selectionMode === "region") {
+      onRegionSelect(regionName)
+      return
+    }
+
+    const coordinates = coordinatesFromPointer(event)
+    if (!coordinates) return
+    onPointSelect(regionName, coordinates.latitude, coordinates.longitude)
+  }
 
   return (
     <Box sx={{ position: "relative" }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1}
+        sx={{ mb: 1.5, justifyContent: "space-between", alignItems: { sm: "center" } }}
+      >
+        <Typography variant="caption" color="text.secondary">
+          {selectionMode === "region"
+            ? "Choose a region for its centroid and demonstration indicators."
+            : "Click inside a region to analyze that exact climate point."}
+        </Typography>
+        <ToggleButtonGroup
+          value={selectionMode}
+          exclusive
+          size="small"
+          aria-label="Map selection mode"
+          onChange={(_, value) => value && setSelectionMode(value)}
+        >
+          <ToggleButton value="region">Region select</ToggleButton>
+          <ToggleButton value="point">Point select</ToggleButton>
+        </ToggleButtonGroup>
+      </Stack>
       <Box
         sx={{
           borderRadius: 0,
@@ -76,9 +132,10 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
+                    data-region-name={name}
                     onMouseEnter={() => setHover(name)}
                     onMouseLeave={() => setHover(null)}
-                    onClick={() => onSelect(name)}
+                    onClick={(event) => selectGeography(event, name)}
                     tabIndex={-1}
                     style={{
                       default: {
@@ -104,6 +161,19 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
             }
           </Geographies>
 
+          {location.mode === "radius" && radiusPath && (
+            <path
+              d={radiusPath}
+              aria-label={`${location.radiusKm} km analysis radius`}
+              fill="rgba(21, 149, 136, 0.16)"
+              stroke={colors.green}
+              strokeWidth={2.5}
+              strokeDasharray="7 5"
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          )}
+
           {REGIONS.map((r) => {
             const active = r.name === selected
             return (
@@ -114,9 +184,9 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
                   stroke="#050607"
                   strokeWidth={active ? 1.6 : 0.9}
                   style={{ cursor: "pointer" }}
-                  onClick={() => onSelect(r.name)}
+                  onClick={() => onRegionSelect(r.name)}
                 />
-                {active && (
+                {active && location.mode === "region" && (
                   <text
                     textAnchor="middle"
                     y={-10}
@@ -136,6 +206,36 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
               </Marker>
             )
           })}
+
+          {location.mode !== "region" && (
+            <Marker coordinates={[location.longitude, location.latitude]}>
+              <g aria-label="Selected analysis point" pointerEvents="none">
+                <circle
+                  r={11}
+                  fill="rgba(5,6,7,0.72)"
+                  stroke={colors.blue}
+                  strokeWidth={2}
+                />
+                <circle r={4.5} fill={colors.white} stroke={colors.blue} strokeWidth={2} />
+                <path d="M -16 0 H 16 M 0 -16 V 16" stroke={colors.blue} strokeWidth={1.5} />
+                <text
+                  textAnchor="middle"
+                  y={-22}
+                  style={{
+                    fontFamily: "var(--font-mono), monospace",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    fill: colors.white,
+                    paintOrder: "stroke",
+                    stroke: "#050607",
+                    strokeWidth: 3,
+                  }}
+                >
+                  {location.mode === "radius" ? `${location.radiusKm} km radius` : "Analysis point"}
+                </text>
+              </g>
+            </Marker>
+          )}
         </ComposableMap>
         )}
       </Box>
@@ -197,7 +297,39 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
             {formatMetric(metric, def.max)}
           </Typography>
         </Box>
+        {location.mode !== "region" && (
+          <Typography variant="caption" sx={{ color: colors.blue }}>
+            Analysis point · {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+          </Typography>
+        )}
+        {location.mode === "radius" && (
+          <Typography variant="caption" sx={{ color: colors.green }}>
+            Dashed outline · {location.radiusKm} km radius
+          </Typography>
+        )}
       </Stack>
     </Box>
   )
+}
+
+function coordinatesFromPointer(event: React.MouseEvent<SVGPathElement>) {
+  const svg = event.currentTarget.ownerSVGElement
+  if (!svg || !projection.invert) return null
+
+  const bounds = svg.getBoundingClientRect()
+  const point: [number, number] = [
+    ((event.clientX - bounds.left) / bounds.width) * WIDTH,
+    ((event.clientY - bounds.top) / bounds.height) * HEIGHT,
+  ]
+  const coordinates = projection.invert(point)
+  if (!coordinates) return null
+
+  return {
+    longitude: roundCoordinate(coordinates[0]),
+    latitude: roundCoordinate(coordinates[1]),
+  }
+}
+
+function roundCoordinate(value: number) {
+  return Math.round(value * 1_000_000) / 1_000_000
 }
