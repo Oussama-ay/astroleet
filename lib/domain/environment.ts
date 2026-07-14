@@ -2,7 +2,14 @@ import { z } from "zod"
 
 export const ENVIRONMENTAL_CONTRACT_VERSION = "1.0" as const
 
-export const environmentalParameterSchema = z.enum(["ndvi", "moisture", "lst"])
+export const environmentalParameterSchema = z.enum([
+  "ndvi",
+  "moisture",
+  "lst",
+  "air_temperature",
+  "precipitation",
+  "relative_humidity",
+])
 export type EnvironmentalParameter = z.infer<typeof environmentalParameterSchema>
 
 export const dataStatusSchema = z.enum([
