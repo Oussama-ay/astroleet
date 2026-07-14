@@ -31,13 +31,17 @@ function regionByName(name: string) {
   return REGIONS.find((r) => r.name === name)
 }
 
+const subscribeToHydration = () => () => {}
+
 export default function MoroccoMap({ metric, selected, onSelect }: Props) {
   const [hover, setHover] = React.useState<string | null>(null)
-  const [mounted, setMounted] = React.useState(false)
+  const mounted = React.useSyncExternalStore(
+    subscribeToHydration,
+    () => true,
+    () => false,
+  )
   const def = METRICS[metric]
   const stops = rampStops(metric)
-
-  React.useEffect(() => setMounted(true), [])
 
   return (
     <Box sx={{ position: "relative" }}>

@@ -78,7 +78,7 @@ export const REGIONS: Region[] = [
 
 // aridity increases from north to south -> use latitude to shape values
 function seeded(seed: number) {
-  let s = Math.sin(seed) * 10000
+  const s = Math.sin(seed) * 10000
   return s - Math.floor(s)
 }
 
