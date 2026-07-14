@@ -29,8 +29,13 @@ import {
   getCompletedClimateHistoryPeriod,
   type ClimateHistoryYears,
 } from "@/lib/domain/climate-history"
+import type {
+  DashboardClimateLocation,
+  DashboardShareState,
+} from "@/lib/domain/dashboard-share"
 import { colors } from "@/lib/theme"
 import ClimateHistory from "./climate-history"
+import DashboardShareActions from "./dashboard-share-actions"
 
 interface PowerApiResponse {
   data: {
@@ -81,26 +86,14 @@ type LoadState =
   | { key: string; status: "success"; response: PowerApiResponse }
   | { key: string; status: "error"; message: string }
 
-export type ClimateLocation =
-  | {
-      mode: "region" | "point"
-      label: string
-      latitude: number
-      longitude: number
-    }
-  | {
-      mode: "radius"
-      label: string
-      latitude: number
-      longitude: number
-      radiusKm: 50 | 100 | 200
-    }
+export type ClimateLocation = DashboardClimateLocation
 
 interface ClimateObservationsProps {
   location: ClimateLocation
   onLocationChange: (location: ClimateLocation | null) => void
   historyYears: ClimateHistoryYears
   onHistoryYearsChange: (years: ClimateHistoryYears) => void
+  shareState: DashboardShareState
 }
 
 export default function ClimateObservations({
@@ -108,6 +101,7 @@ export default function ClimateObservations({
   onLocationChange,
   historyYears,
   onHistoryYearsChange,
+  shareState,
 }: ClimateObservationsProps) {
   const [attempt, setAttempt] = React.useState(0)
   const [loadState, setLoadState] = React.useState<LoadState | null>(null)
@@ -220,6 +214,7 @@ export default function ClimateObservations({
             variant="outlined"
             sx={{ borderColor: colors.line, color: "text.secondary" }}
           />
+          <DashboardShareActions state={shareState} />
         </Stack>
       </Stack>
 

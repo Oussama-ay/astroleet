@@ -3,6 +3,10 @@ import { expect, test } from "@playwright/test"
 test("dashboard loads its core monitoring experience", async ({ page }) => {
   const climateRequests: string[] = []
   const radiusRequests: string[] = []
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"])
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", { configurable: true, value: undefined })
+  })
   await page.route("**/api/climate/power/radius?**", async (route) => {
     radiusRequests.push(route.request().url())
     await route.fulfill({
@@ -71,6 +75,33 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   )
   await expect(page.getByText("Derived radius mean")).toBeVisible()
   await expect(page.getByText("Derived mean of 5 samples across a 100 km radius")).toBeVisible()
+  await page.getByRole("combobox", { name: "History" }).selectOption("5")
+  await page.locator('button[value="lst"]').click()
+  await page.getByRole("button", { name: "Share analysis" }).click()
+  await expect(page.getByRole("status")).toHaveText("Analysis link copied")
+
+  const sharedUrl = page.url()
+  const sharedParams = new URL(sharedUrl).searchParams
+  expect(sharedParams.get("view")).toBe("1")
+  expect(sharedParams.get("region")).toBe("Marrakech-Safi")
+  expect(sharedParams.get("metric")).toBe("lst")
+  expect(sharedParams.get("history")).toBe("5")
+  expect(sharedParams.get("mode")).toBe("radius")
+  expect(sharedParams.get("radius")).toBe("100")
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(sharedUrl)
+
+  await page.goto(sharedUrl)
+  await expect(page.getByRole("combobox", { name: "Select region" })).toHaveValue(
+    "Marrakech-Safi",
+  )
+  await expect(page.getByRole("combobox", { name: "History" })).toHaveValue("5")
+  await expect(page.locator('button[value="lst"]')).toHaveAttribute("aria-pressed", "true")
+  await expect(
+    page.getByText("Monthly climate observations for a 100 km radius around 33.5700, -7.5900."),
+  ).toBeVisible()
+  await expect.poll(() => radiusRequests.at(-1)).toContain(
+    `radiusKm=100&start=${historicalStartYear}&end=${latestCompleteYear}`,
+  )
   await page.getByRole("button", { name: "Use regional centroid" }).click()
   await expect(
     page.getByText("Monthly climate observations for the Marrakech-Safi regional centroid."),
