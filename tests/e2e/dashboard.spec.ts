@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test"
 test("dashboard loads its core monitoring experience", async ({ page }) => {
   const climateRequests: string[] = []
   const radiusRequests: string[] = []
+  const explanationRequests: unknown[] = []
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"])
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "share", { configurable: true, value: undefined })
@@ -24,6 +25,13 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
           ? historicalPowerResponse
           : powerResponse,
       ),
+    })
+  })
+  await page.route("**/api/climate/explain", async (route) => {
+    explanationRequests.push(route.request().postDataJSON())
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify(aiExplanationResponse),
     })
   })
 
@@ -56,6 +64,17 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   ).toBeVisible()
   await expect(page.getByText("Warmer than seasonal baseline")).toBeVisible()
   await expect(page.getByText("Deterministic screening")).toBeVisible()
+  await page.getByRole("button", { name: "Explain with AI" }).click()
+  await expect(page.getByRole("heading", { name: "AI-assisted interpretation" })).toBeVisible()
+  await expect(page.getByText("A warmer month deserves local verification")).toBeVisible()
+  expect(explanationRequests).toHaveLength(1)
+  expect(explanationRequests[0]).toMatchObject({
+    series: expect.arrayContaining([
+      expect.objectContaining({ parameter: "air_temperature" }),
+      expect.objectContaining({ parameter: "precipitation" }),
+      expect.objectContaining({ parameter: "relative_humidity" }),
+    ]),
+  })
   await page.getByRole("button", { name: "Precipitation" }).click()
   await expect(page.getByRole("button", { name: "Precipitation" })).toHaveAttribute(
     "aria-pressed",
@@ -64,6 +83,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await page.getByRole("combobox", { name: "History" }).selectOption("1")
   await expect(page.getByText("1-year history")).toBeVisible()
   await expect(page.getByText("Longer history required")).toBeVisible()
+  await expect(page.getByRole("button", { name: "Explain with AI" })).toHaveCount(0)
   await page.getByLabel("Latitude").fill("91")
   await expect(page.getByRole("button", { name: "Apply point" })).toBeDisabled()
   await expect(page.getByText("Latitude must be a number between −90 and 90.")).toBeVisible()
@@ -261,5 +281,32 @@ const radiusPowerResponse = {
     method: "five-point-radius-mean",
     sampleCount: 5,
     cacheTtlSeconds: 86400,
+  },
+}
+
+const aiExplanationResponse = {
+  data: {
+    explanation: {
+      headline: "A warmer month deserves local verification",
+      overview:
+        "The latest monthly temperature is above its same-month historical baseline, while this remains a screening result rather than a forecast.",
+      signalExplanations: [
+        {
+          signalId: "warmer-than-baseline",
+          meaning: "The configured temperature threshold was exceeded.",
+          whyItMatters: "Elevated monthly averages can help prioritize where to inspect conditions.",
+          verifyNext: "Compare with local station readings and inspect heat-sensitive areas.",
+        },
+      ],
+      caveats: [
+        "Monthly averages can hide daily extremes.",
+        "NASA POWER is gridded data and should be checked locally.",
+      ],
+    },
+  },
+  meta: {
+    provider: "OpenAI",
+    model: "gpt-5.6-luna",
+    generatedAt: "2026-07-14T16:00:00.000Z",
   },
 }

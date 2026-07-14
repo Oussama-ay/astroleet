@@ -46,6 +46,23 @@ Open the app at:
 http://localhost:3000
 ```
 
+## Optional AI climate explanations
+
+The observed-climate dashboard works without AI. To enable its on-demand, evidence-constrained
+explanations, create an OpenAI project API key and copy the example environment file:
+
+```bash
+cp .env.example .env.local
+```
+
+Set `OPENAI_API_KEY` in `.env.local`, then restart the development server. Keep the key server-side:
+never use a `NEXT_PUBLIC_` name, paste it into client code, or commit `.env.local`. The optional
+`OPENAI_MODEL` defaults to `gpt-5.6-luna`.
+
+For deployed environments, add the same variables through the hosting provider's encrypted
+environment settings. Use separate OpenAI projects for preview and production when possible, and
+configure spend notifications and project limits in the OpenAI dashboard.
+
 If port `3000` is already in use, Next.js may ask to use another port. Accept it, then open the URL printed in the terminal.
 
 ## Production build
