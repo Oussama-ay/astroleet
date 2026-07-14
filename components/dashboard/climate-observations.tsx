@@ -24,7 +24,13 @@ import type {
   EnvironmentalParameter,
   EnvironmentalSeries,
 } from "@/lib/domain/environment"
+import {
+  CLIMATE_HISTORY_YEAR_OPTIONS,
+  getCompletedClimateHistoryPeriod,
+  type ClimateHistoryYears,
+} from "@/lib/domain/climate-history"
 import { colors } from "@/lib/theme"
+import ClimateHistory from "./climate-history"
 
 interface PowerApiResponse {
   data: {
@@ -93,11 +99,15 @@ export type ClimateLocation =
 interface ClimateObservationsProps {
   location: ClimateLocation
   onLocationChange: (location: ClimateLocation | null) => void
+  historyYears: ClimateHistoryYears
+  onHistoryYearsChange: (years: ClimateHistoryYears) => void
 }
 
 export default function ClimateObservations({
   location,
   onLocationChange,
+  historyYears,
+  onHistoryYearsChange,
 }: ClimateObservationsProps) {
   const [attempt, setAttempt] = React.useState(0)
   const [loadState, setLoadState] = React.useState<LoadState | null>(null)
@@ -107,11 +117,13 @@ export default function ClimateObservations({
     location.mode === "radius" ? location.radiusKm : 100,
   )
   const pointValidation = validatePoint(draftLatitude, draftLongitude)
+  const historyPeriod = getCompletedClimateHistoryPeriod(historyYears)
+  const historyQuery = `start=${historyPeriod.start}&end=${historyPeriod.end}`
   const requestUrl =
     location.mode === "radius"
-      ? `/api/climate/power/radius?latitude=${location.latitude}&longitude=${location.longitude}&radiusKm=${location.radiusKm}`
-      : `/api/climate/power?latitude=${location.latitude}&longitude=${location.longitude}`
-  const requestKey = `${location.mode}:${location.latitude}:${location.longitude}:${location.mode === "radius" ? location.radiusKm : "point"}:${attempt}`
+      ? `/api/climate/power/radius?latitude=${location.latitude}&longitude=${location.longitude}&radiusKm=${location.radiusKm}&${historyQuery}`
+      : `/api/climate/power?latitude=${location.latitude}&longitude=${location.longitude}&${historyQuery}`
+  const requestKey = `${location.mode}:${location.latitude}:${location.longitude}:${location.mode === "radius" ? location.radiusKm : "point"}:${historyYears}:${attempt}`
   const currentState = loadState?.key === requestKey ? loadState : null
 
   function applyPoint(event: React.FormEvent<HTMLFormElement>) {
@@ -202,6 +214,12 @@ export default function ClimateObservations({
             size="small"
             sx={{ bgcolor: colors.blueSoft, color: colors.blueDark }}
           />
+          <Chip
+            label={`${historyYears}-year history`}
+            size="small"
+            variant="outlined"
+            sx={{ borderColor: colors.line, color: "text.secondary" }}
+          />
         </Stack>
       </Stack>
 
@@ -250,6 +268,23 @@ export default function ClimateObservations({
             <option value={50}>50 km</option>
             <option value={100}>100 km</option>
             <option value={200}>200 km</option>
+          </TextField>
+          <TextField
+            select
+            label="History"
+            value={historyYears}
+            onChange={(event) =>
+              onHistoryYearsChange(Number(event.target.value) as ClimateHistoryYears)
+            }
+            size="small"
+            slotProps={{ select: { native: true } }}
+            sx={{ width: { sm: 130 } }}
+          >
+            {CLIMATE_HISTORY_YEAR_OPTIONS.map((years) => (
+              <option key={years} value={years}>
+                {years} {years === 1 ? "year" : "years"}
+              </option>
+            ))}
           </TextField>
           <Button type="submit" variant="contained" disabled={!pointValidation.valid}>
             Apply point
@@ -398,6 +433,8 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
           )
         })}
       </Grid>
+
+      <ClimateHistory series={response.data.series} />
 
       {provenance && (
         <>
