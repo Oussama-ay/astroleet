@@ -48,20 +48,30 @@ http://localhost:3000
 
 ## Optional AI climate explanations
 
-The observed-climate dashboard works without AI. To enable its on-demand, evidence-constrained
-explanations, create an OpenAI project API key and copy the example environment file:
+The observed-climate dashboard works without AI. It supports OpenRouter or OpenAI for its
+on-demand, evidence-constrained explanations. Copy the example environment file:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Set `OPENAI_API_KEY` in `.env.local`, then restart the development server. Keep the key server-side:
-never use a `NEXT_PUBLIC_` name, paste it into client code, or commit `.env.local`. The optional
-`OPENAI_MODEL` defaults to `gpt-5.6-luna`.
+Set `AI_API_KEY` in `.env.local`, then restart the development server. The example selects
+`openrouter` with `nvidia/nemotron-3-ultra-550b-a55b:free`. Keep the key server-side: never use a
+`NEXT_PUBLIC_` name, paste it into client code, or commit `.env.local`.
+
+Existing `OPENAI_API_KEY` and `OPENAI_MODEL` variables remain compatible. When a legacy model name
+contains `/`, Astroleet infers OpenRouter, so current local environments do not need an immediate
+rename. For OpenAI, set `AI_PROVIDER=openai`, `AI_API_KEY`, and an OpenAI model in `AI_MODEL`.
+
+OpenRouter's page for this free Nemotron endpoint states that request content may be logged for
+security and NVIDIA product improvement. Astroleet excludes exact point coordinates and only sends
+compact climate evidence, but do not use a free endpoint for confidential data. Review the
+[model policy and endpoint details](https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b%3Afree)
+before production use.
 
 For deployed environments, add the same variables through the hosting provider's encrypted
-environment settings. Use separate OpenAI projects for preview and production when possible, and
-configure spend notifications and project limits in the OpenAI dashboard.
+environment settings. Use separate provider keys for preview and production when possible, and
+configure provider budget and rate-limit controls.
 
 The AI route includes privacy-safe request logs, request IDs, and a best-effort per-instance burst
 limit. See [the operations guide](docs/operations.md) for health checks, configuration, telemetry,

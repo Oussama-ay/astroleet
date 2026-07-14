@@ -12,6 +12,10 @@ import {
   classifyAIProviderError,
   generateAIClimateExplanation,
 } from "../../lib/server/openai-climate-explanation"
+import {
+  isAIExplanationConfigured,
+  resolveAIProviderConfig,
+} from "../../lib/server/ai-provider-config"
 
 describe("AI climate explanation contract", () => {
   it("builds bounded context from the deterministic assessment", () => {
@@ -89,11 +93,65 @@ describe("AI climate explanation contract", () => {
         },
       }),
     ).not.toThrow()
+
+    expect(() =>
+      aiClimateExplainResponseSchema.parse({
+        data: {
+          explanation: {
+            headline: "Observed warmth needs verification",
+            overview: "The monthly signal exceeded the configured threshold.",
+            signalExplanations: [
+              {
+                signalId: "warmer-than-baseline",
+                meaning: "The monthly average is elevated.",
+                whyItMatters: "It identifies an area for inspection.",
+                verifyNext: "Compare with a local station.",
+              },
+            ],
+            caveats: ["This is not a forecast.", "Monthly averages can hide extremes."],
+          },
+        },
+        meta: {
+          provider: "OpenRouter",
+          model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+          generatedAt: "2026-07-14T16:00:00.000Z",
+          requestId: "ad2fb018-43df-4b1d-892e-560cd6614c1d",
+        },
+      }),
+    ).not.toThrow()
+  })
+
+  it("infers OpenRouter from its model slug while supporting legacy variables", () => {
+    expect(
+      resolveAIProviderConfig({
+        OPENAI_API_KEY: "legacy-openrouter-key",
+        OPENAI_MODEL: "nvidia/nemotron-3-ultra-550b-a55b:free",
+      }),
+    ).toEqual({
+      provider: "OpenRouter",
+      model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+      apiKey: "legacy-openrouter-key",
+    })
+
+    expect(
+      resolveAIProviderConfig({
+        AI_PROVIDER: "openai",
+        AI_API_KEY: "openai-key",
+        AI_MODEL: "gpt-5.6-luna",
+      }).provider,
+    ).toBe("OpenAI")
+    expect(isAIExplanationConfigured({ AI_API_KEY: "key" })).toBe(true)
   })
 
   it("fails safely without a server API key", async () => {
-    const previousKey = process.env.OPENAI_API_KEY
+    const previousKeys = {
+      AI_API_KEY: process.env.AI_API_KEY,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+    }
+    delete process.env.AI_API_KEY
     delete process.env.OPENAI_API_KEY
+    delete process.env.OPENROUTER_API_KEY
 
     try {
       await expect(
@@ -107,8 +165,10 @@ describe("AI climate explanation contract", () => {
         }),
       ).rejects.toMatchObject({ code: "not_configured" })
     } finally {
-      if (previousKey === undefined) delete process.env.OPENAI_API_KEY
-      else process.env.OPENAI_API_KEY = previousKey
+      for (const [name, value] of Object.entries(previousKeys)) {
+        if (value === undefined) delete process.env[name]
+        else process.env[name] = value
+      }
     }
   })
 
@@ -132,10 +192,17 @@ describe("AI climate explanation contract", () => {
       "invalid key",
       headers,
     )
+    const paymentRequired = new OpenAI.APIError(
+      402,
+      { code: "payment_required" },
+      "credits exhausted",
+      headers,
+    )
 
     expect(classifyAIProviderError(quota).code).toBe("quota_exceeded")
     expect(classifyAIProviderError(throttled).code).toBe("rate_limited")
     expect(classifyAIProviderError(authentication).code).toBe("authentication_failed")
+    expect(classifyAIProviderError(paymentRequired).code).toBe("quota_exceeded")
     expect(
       classifyAIProviderError(new OpenAI.APIConnectionTimeoutError()).code,
     ).toBe("timeout")

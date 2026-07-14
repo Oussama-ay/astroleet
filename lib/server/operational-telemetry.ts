@@ -6,6 +6,7 @@ export interface OperationalEvent {
   status: number
   durationMs: number
   errorCode?: string
+  provider?: "OpenAI" | "OpenRouter"
   model?: string
   signalCount?: number
 }

@@ -3,13 +3,14 @@
 ## Runtime health
 
 `GET /api/health` reports whether the application process is running and whether the optional AI
-credential is configured. It does not call NASA POWER or OpenAI, reveal credentials, or guarantee
-that an external provider currently has capacity.
+credential is configured. It does not call NASA POWER or the configured AI provider, reveal
+credentials, or guarantee that an external provider currently has capacity.
 
 ## AI request safeguards
 
 `POST /api/climate/explain` applies a five-request-per-minute default burst limit before parsing the
-request or contacting OpenAI. Override the defaults with `AI_RATE_LIMIT_MAX_REQUESTS` and
+request or contacting the configured AI provider. Override the defaults with
+`AI_RATE_LIMIT_MAX_REQUESTS` and
 `AI_RATE_LIMIT_WINDOW_SECONDS`.
 
 The limiter stores hashed client identifiers only in process memory. It protects a warm application
@@ -25,11 +26,11 @@ Every AI response includes:
 ## Privacy-safe telemetry
 
 AI route events are emitted as one-line JSON records through the hosting platform's normal logs.
-Records contain the request ID, outcome, HTTP status, duration, safe error code, model on success,
-and signal count. They never contain API keys, exact coordinates, environmental values, prompts,
-provider response bodies, or client IP addresses.
+Records contain the request ID, outcome, HTTP status, duration, safe error code, provider and model
+on success, and signal count. They never contain API keys, exact coordinates, environmental values,
+prompts, provider response bodies, or client IP addresses.
 
-OpenAI failures are separated into quota, provider rate limit, authentication/configuration,
+AI provider failures are separated into quota, provider rate limit, authentication/configuration,
 timeout, invalid structured output, and general provider availability categories. Public responses
 remain safe while logs retain enough context to find the failing request.
 

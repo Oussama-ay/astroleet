@@ -79,7 +79,7 @@ export const aiClimateExplainResponseSchema = z.strictObject({
     explanation: aiClimateExplanationSchema,
   }),
   meta: z.strictObject({
-    provider: z.literal("OpenAI"),
+    provider: z.enum(["OpenAI", "OpenRouter"]),
     model: z.string().min(1),
     generatedAt: z.iso.datetime({ offset: true }),
     requestId: z.uuid(),
