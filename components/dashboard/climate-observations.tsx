@@ -5,9 +5,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  Chip,
-  Divider,
   Grid,
   Link,
   Skeleton,
@@ -15,7 +12,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material"
-import CloudSyncOutlinedIcon from "@mui/icons-material/CloudSyncOutlined"
 import OpenInNewIcon from "@mui/icons-material/OpenInNew"
 import ThermostatIcon from "@mui/icons-material/Thermostat"
 import WaterDropOutlinedIcon from "@mui/icons-material/WaterDropOutlined"
@@ -179,46 +175,61 @@ export default function ClimateObservations({
   }, [requestKey, requestUrl])
 
   return (
-    <Card sx={{ p: { xs: 2, md: 3 }, bgcolor: "#090B0C" }}>
+    <Box
+      component="section"
+      aria-labelledby="observed-climate-title"
+      sx={{ border: `1px solid ${colors.line}`, bgcolor: "rgba(7,9,10,0.96)" }}
+    >
       <Stack
         direction={{ xs: "column", sm: "row" }}
-        spacing={1.5}
-        sx={{ justifyContent: "space-between", alignItems: { sm: "flex-start" } }}
+        spacing={2}
+        sx={{
+          px: { xs: 2, md: 3 },
+          py: 2.25,
+          justifyContent: "space-between",
+          alignItems: { sm: "flex-end" },
+          borderBottom: `1px solid ${colors.line}`,
+        }}
       >
         <Box>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 0.5 }}>
-            <CloudSyncOutlinedIcon sx={{ color: colors.blue }} />
-            <Typography component="h2" variant="h5">
-              Observed climate from NASA POWER
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <Typography variant="overline" sx={{ color: colors.blue, fontFamily: "var(--font-mono)" }}>
+              03
+            </Typography>
+            <Box sx={{ width: 28, height: "1px", bgcolor: colors.line }} />
+            <Typography variant="overline" color="text.secondary">
+              Observed evidence
             </Typography>
           </Stack>
-          <Typography variant="body2" color="text.secondary">
+          <Typography id="observed-climate-title" component="h2" variant="h4" sx={{ mt: 0.75 }}>
+            Climate record
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Monthly climate observations for {location.label}.
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
-          <Chip
-            label={
+        <Stack
+          direction="row"
+          spacing={{ xs: 2, md: 3 }}
+          sx={{ flexWrap: "wrap", alignItems: "center" }}
+        >
+          <ObservationMeta
+            label="Geometry"
+            value={
               location.mode === "region"
                 ? "Regional centroid"
                 : location.mode === "radius"
                   ? `${location.radiusKm} km radius`
                   : "Exact point"
             }
-            size="small"
-            variant="outlined"
-            sx={{ borderColor: colors.line, color: "text.secondary" }}
           />
-          <Chip
-            label={location.mode === "radius" ? "Derived radius mean" : "Cached observed data"}
-            size="small"
-            sx={{ bgcolor: colors.blueSoft, color: colors.blueDark }}
+          <ObservationMeta
+            label="Status"
+            value={location.mode === "radius" ? "Derived radius mean" : "Cached observed data"}
           />
-          <Chip
-            label={`${historyYears}-year history`}
-            size="small"
-            variant="outlined"
-            sx={{ borderColor: colors.line, color: "text.secondary" }}
+          <ObservationMeta
+            label="Window"
+            value={`${historyYears}-year history`}
           />
           <DashboardShareActions state={shareState} />
         </Stack>
@@ -227,10 +238,15 @@ export default function ClimateObservations({
       <Box
         component="form"
         onSubmit={applyPoint}
-        sx={{ mt: 2.5, p: 2, border: `1px solid ${colors.line}`, bgcolor: "#0D1012" }}
+        sx={{
+          px: { xs: 2, md: 3 },
+          py: 2,
+          borderBottom: `1px solid ${colors.line}`,
+          bgcolor: "rgba(255,255,255,0.018)",
+        }}
       >
-        <Typography variant="overline" color="text.secondary">
-          Point or radius climate analysis
+        <Typography variant="overline" sx={{ color: colors.white }}>
+          Analysis geometry
         </Typography>
         <Stack
           direction={{ xs: "column", sm: "row" }}
@@ -323,9 +339,11 @@ export default function ClimateObservations({
         </Typography>
       </Box>
 
-      <Divider sx={{ my: 2.5 }} />
-
-      {!currentState && <ClimateLoading />}
+      {!currentState && (
+        <Box sx={{ p: { xs: 2, md: 3 } }}>
+          <ClimateLoading />
+        </Box>
+      )}
 
       {currentState?.status === "error" && (
         <Alert
@@ -335,7 +353,7 @@ export default function ClimateObservations({
               Retry
             </Button>
           }
-          sx={{ bgcolor: "#211B12", color: "text.primary" }}
+          sx={{ m: { xs: 2, md: 3 }, bgcolor: "#211B12", color: "text.primary" }}
         >
           {currentState.message}. The demonstration indicators remain available below.
         </Alert>
@@ -344,7 +362,7 @@ export default function ClimateObservations({
       {currentState?.status === "success" && (
         <ClimateResults response={currentState.response} />
       )}
-    </Card>
+    </Box>
   )
 }
 
@@ -409,7 +427,7 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
 
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container spacing={0} sx={{ borderBottom: `1px solid ${colors.line}` }}>
         {CLIMATE_CARDS.map((card) => {
           const series = response.data.series.find(
             (candidate) => candidate.parameter === card.parameter,
@@ -417,22 +435,29 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
           const latest = series?.values.findLast((entry) => entry.value !== null)
 
           return (
-            <Grid key={card.parameter} size={{ xs: 12, sm: 4 }}>
+            <Grid
+              key={card.parameter}
+              size={{ xs: 12, sm: 4 }}
+              sx={{
+                borderRight: { sm: `1px solid ${colors.line}` },
+                borderBottom: { xs: `1px solid ${colors.line}`, sm: 0 },
+                "&:last-of-type": { borderRight: 0, borderBottom: 0 },
+              }}
+            >
               <Box
                 aria-label={`${card.label} observed value`}
                 sx={{
                   position: "relative",
                   height: "100%",
-                  minHeight: 142,
-                  p: 2,
-                  border: `1px solid ${colors.line}`,
-                  bgcolor: "#0D1012",
+                  minHeight: 132,
+                  px: { xs: 2, md: 3 },
+                  py: 2.25,
                   overflow: "hidden",
                   "&::before": {
                     content: '""',
                     position: "absolute",
-                    inset: "0 auto 0 0",
-                    width: 3,
+                    inset: "auto 24px 0 24px",
+                    height: 2,
                     bgcolor: card.accent,
                   },
                 }}
@@ -443,7 +468,7 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
                     {card.label}
                   </Typography>
                 </Stack>
-                <Typography variant="h4" sx={{ mt: 1.5, fontFamily: "var(--font-mono)" }}>
+                <Typography variant="h4" sx={{ mt: 1.25, fontFamily: "var(--font-mono)" }}>
                   {latest && series ? formatClimateValue(latest.value, series.unit) : "Unavailable"}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
@@ -455,13 +480,30 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
         })}
       </Grid>
 
-      <ClimateHistory series={response.data.series} />
-
-      <ObservedClimateRecommendations series={response.data.series} />
+      <Grid container>
+        <Grid
+          size={{ xs: 12, lg: 7 }}
+          sx={{
+            borderRight: { lg: `1px solid ${colors.line}` },
+            borderBottom: { xs: `1px solid ${colors.line}`, lg: 0 },
+          }}
+        >
+          <ClimateHistory series={response.data.series} />
+        </Grid>
+        <Grid size={{ xs: 12, lg: 5 }}>
+          <ObservedClimateRecommendations series={response.data.series} />
+        </Grid>
+      </Grid>
 
       {provenance && (
-        <>
-          <Divider sx={{ my: 2.5 }} />
+        <Box
+          sx={{
+            px: { xs: 2, md: 3 },
+            py: 2.25,
+            borderTop: `1px solid ${colors.line}`,
+            bgcolor: "rgba(255,255,255,0.018)",
+          }}
+        >
           <Stack
             direction={{ xs: "column", md: "row" }}
             spacing={{ xs: 1.5, md: 4 }}
@@ -499,9 +541,22 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
               </Link>
             </Stack>
           </Stack>
-        </>
+        </Box>
       )}
     </>
+  )
+}
+
+function ObservationMeta({ label, value }: { label: string; value: string }) {
+  return (
+    <Box>
+      <Typography variant="overline" sx={{ display: "block", color: "text.secondary", lineHeight: 1.2 }}>
+        {label}
+      </Typography>
+      <Typography variant="caption" sx={{ color: colors.white, fontFamily: "var(--font-mono)" }}>
+        {value}
+      </Typography>
+    </Box>
   )
 }
 

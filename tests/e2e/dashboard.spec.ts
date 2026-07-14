@@ -51,7 +51,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await page.goto("/dashboard")
 
   await expect(
-    page.getByRole("heading", { name: "Morocco environmental monitor" }),
+    page.getByRole("heading", { name: "Morocco environmental atlas" }),
   ).toBeVisible()
   await expect(
     page.getByRole("heading", { name: "Morocco map explorer" }),
@@ -65,7 +65,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
     "Marrakech-Safi",
   )
   await expect(
-    page.getByRole("heading", { name: "Observed climate from NASA POWER" }),
+    page.getByRole("heading", { name: "Climate record" }),
   ).toBeVisible()
   await expect(page.getByLabel("Air temperature observed value")).toContainText("12.30°C")
   await expect(page.getByText("Cached observed data")).toBeVisible()
@@ -78,7 +78,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
     page.getByText(`60 monthly observations · ${historicalStartYear}–${latestCompleteYear}`),
   ).toBeVisible()
   await expect(
-    page.getByRole("heading", { name: "Observed climate signals" }),
+    page.getByRole("heading", { name: "Observed signals" }),
   ).toBeVisible()
   await expect(page.getByText("Warmer than seasonal baseline")).toBeVisible()
   await expect(page.getByText("Deterministic screening")).toBeVisible()
@@ -188,7 +188,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect(page.getByLabel("Selected analysis point")).toBeVisible()
   await expect.poll(() => climateRequests.at(-1)).toContain("/api/climate/power?latitude=")
   await expect(
-    page.getByRole("heading", { name: "Demonstration satellite indicators" }),
+    page.getByRole("heading", { name: "Satellite layer laboratory" }),
   ).toBeVisible()
   await expect(page.getByText("Validate with in-situ sampling")).toBeVisible()
   expect(browserErrors).toEqual([])
