@@ -1,6 +1,7 @@
 {
-  "name": "my-project",
+  "name": "astroleet",
   "version": "0.1.0",
+  "description": "Environmental intelligence for Morocco using Earth-observation data.",
   "private": true,
   "packageManager": "pnpm@10.34.5",
   "scripts": {

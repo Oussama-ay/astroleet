@@ -1,111 +1,109 @@
-# my-project
+# Astroleet
 
-Next.js application built with React 19, Tailwind CSS, MUI, and pnpm.
+Astroleet is an environmental-intelligence platform for Morocco. It presents
+vegetation, soil-moisture, and land-surface-temperature indicators across the
+country's 12 administrative regions, with regional trends, recommendations,
+and transparent methodology.
+
+## Data status
+
+The current dashboard is a demonstration. Environmental values and 12-month
+histories are deterministic synthetic data modelled on Morocco's north-to-south
+agro-climatic gradient. They are not live satellite observations and must not
+be used for operational decisions.
+
+The regional boundaries are real geographic data. Live provider integrations,
+beginning with NASA POWER climate data, will be added behind server-side
+Astroleet APIs. The architecture and data-boundary decisions are documented in
+[docs/architecture.md](docs/architecture.md).
+
+## Current product
+
+- Cinematic overview of the Morocco environmental-monitoring mission.
+- Interactive choropleth for Morocco's 12 regions.
+- Demonstration layers for NDVI, soil moisture, and land-surface temperature.
+- Twelve-month demonstration histories and rule-based recommendations.
+- Methodology, processing pipeline, provenance, and uncertainty documentation.
+- Responsive dark interface built for desktop and mobile browsers.
+
+## Technology
+
+- Next.js 16 App Router
+- React 19 and TypeScript
+- Material UI and MUI X Charts
+- React Simple Maps and D3 geographic projection
+- Tailwind CSS 4
+- pnpm
+- Vercel Analytics in production
 
 ## Requirements
 
 - Node.js 22 or newer
-- Corepack, which is included with modern Node.js releases
+- Corepack, included with modern Node.js releases
 
-This project uses `pnpm-lock.yaml`, so use pnpm instead of npm or yarn. You do not need to install pnpm globally if Corepack is available.
-
-## First-time setup
-
-From the project root:
+## Local setup
 
 ```bash
 corepack enable
 corepack pnpm install
-```
-
-The repository includes `pnpm-workspace.yaml` with approved dependency build scripts:
-
-```yaml
-allowBuilds:
-  msw: true
-  sharp: true
-```
-
-Keep these values set to `true`. Without them, pnpm may stop with this error:
-
-```text
-ERR_PNPM_IGNORED_BUILDS Ignored build scripts: msw, sharp
-```
-
-`sharp` is used by Next.js image tooling, and `msw` runs its package setup script. Approving those builds lets `pnpm install` complete cleanly.
-
-## Run the development server
-
-```bash
+cp .env.example .env.local
 corepack pnpm dev
 ```
 
-Open the app at:
+Open `http://localhost:3000`.
+
+No environment variables are currently required. The example file documents
+the security rules that future data-provider integrations must follow.
+
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `corepack pnpm dev` | Start the development server. |
+| `corepack pnpm lint` | Run ESLint. |
+| `corepack pnpm build` | Create a production build. |
+| `corepack pnpm start` | Run the production build. |
+
+## Project structure
 
 ```text
-http://localhost:3000
+app/                    Routes, layouts, and global styles
+components/             Shared UI and dashboard components
+components/dashboard/   Map, controls, metrics, charts, and recommendations
+lib/                    Domain data, scales, theme, and geographic boundaries
+public/                 Images, videos, icons, and public geographic data
+docs/                   Architecture and engineering decisions
 ```
 
-If port `3000` is already in use, Next.js may ask to use another port. Accept it, then open the URL printed in the terminal.
+## Package installation
 
-## Production build
+This repository uses `pnpm-lock.yaml`. Use pnpm rather than npm or Yarn so
+dependency versions remain reproducible.
 
-To verify the app builds for production:
+`pnpm-workspace.yaml` approves the required install scripts for `msw` and
+`sharp`. Keep those approvals enabled or pnpm may reject their build steps.
 
-```bash
-corepack pnpm build
-```
+## Data and security rules
 
-To run the production server after a successful build:
+- The interface must label values as live, derived, cached, or demonstration.
+- Every live result must include its source, period, units, resolution, and
+  retrieval time.
+- External providers must be called through server-side services rather than
+  directly from dashboard components.
+- API keys and other secrets must never be committed or exposed through
+  `NEXT_PUBLIC_` environment variables.
+- AI explanations may interpret validated measurements but must never invent
+  or replace the underlying calculations.
 
-```bash
-corepack pnpm start
-```
+## Deployment
 
-## Linting
+The application is configured for Vercel. Before deployment, run:
 
 ```bash
 corepack pnpm lint
+corepack pnpm build
 ```
 
-## Troubleshooting
-
-### `pnpm: command not found`
-
-Use Corepack:
-
-```bash
-corepack pnpm install
-corepack pnpm dev
-```
-
-If Corepack itself is unavailable, install a current Node.js version and try again.
-
-### `ERR_PNPM_IGNORED_BUILDS`
-
-Make sure `pnpm-workspace.yaml` contains:
-
-```yaml
-allowBuilds:
-  msw: true
-  sharp: true
-```
-
-Then rerun:
-
-```bash
-corepack pnpm install
-```
-
-### Dependency warnings about `pnpm.overrides`
-
-pnpm v11 may print a warning that the `pnpm` field in `package.json` is ignored. The app can still run. If you want to remove the warning later, move the override into `pnpm-workspace.yaml` using pnpm's current settings format.
-
-### Clean reinstall
-
-If dependencies are corrupted or the app behaves unexpectedly, remove `node_modules` and reinstall:
-
-```bash
-rm -rf node_modules
-corepack pnpm install
-```
+Environment variables introduced by future server integrations must be added
+to the deployment environment and documented in `.env.example` without secret
+values.
