@@ -4,11 +4,10 @@
 
 import {
   parseEnvironmentalSeries,
-  type EnvironmentalParameter,
   type EnvironmentalSeries,
 } from "./domain/environment"
 
-export type MetricKey = EnvironmentalParameter
+export type MetricKey = "ndvi" | "moisture" | "lst"
 
 export interface MetricDef {
   key: MetricKey
