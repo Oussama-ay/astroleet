@@ -4,6 +4,8 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   const climateRequests: string[] = []
   const radiusRequests: string[] = []
   const explanationRequests: unknown[] = []
+  const browserErrors: string[] = []
+  page.on("pageerror", (error) => browserErrors.push(error.message))
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"])
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "share", { configurable: true, value: undefined })
@@ -34,6 +36,9 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
       body: JSON.stringify(aiExplanationResponse),
     })
   })
+  await page.route(/https:\/\/[abc]\.tile\.openstreetmap\.org\/.*/, (route) =>
+    route.abort(),
+  )
 
   const healthResponse = await page.request.get("/api/health")
   expect(healthResponse.ok()).toBe(true)
@@ -51,6 +56,11 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Morocco map explorer" }),
   ).toBeVisible()
+  await expect(
+    page.getByRole("region", { name: "Interactive map restricted to Morocco" }),
+  ).toBeVisible()
+  await expect(page.locator(".leaflet-container")).toBeVisible()
+  await expect(page.locator(".leaflet-control-attribution")).toContainText("OpenStreetMap")
   await expect(page.getByRole("combobox", { name: "Select region" })).toHaveValue(
     "Marrakech-Safi",
   )
@@ -95,6 +105,10 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await page.getByLabel("Latitude").fill("91")
   await expect(page.getByRole("button", { name: "Apply point" })).toBeDisabled()
   await expect(page.getByText("Latitude must be a number between −90 and 90.")).toBeVisible()
+  await page.getByLabel("Latitude").fill("40")
+  await page.getByLabel("Longitude").fill("-8")
+  await expect(page.getByRole("button", { name: "Apply point" })).toBeDisabled()
+  await expect(page.getByText("Select a point inside Morocco's mapped regions.")).toBeVisible()
   await page.getByLabel("Latitude").fill("33.57")
   await page.getByLabel("Longitude").fill("-7.59")
   await page.getByRole("button", { name: "Apply point" }).click()
@@ -120,7 +134,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   const sharedUrl = page.url()
   const sharedParams = new URL(sharedUrl).searchParams
   expect(sharedParams.get("view")).toBe("1")
-  expect(sharedParams.get("region")).toBe("Marrakech-Safi")
+  expect(sharedParams.get("region")).toBe("Casablanca-Settat")
   expect(sharedParams.get("metric")).toBe("lst")
   expect(sharedParams.get("history")).toBe("5")
   expect(sharedParams.get("mode")).toBe("radius")
@@ -129,7 +143,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
 
   await page.goto(sharedUrl)
   await expect(page.getByRole("combobox", { name: "Select region" })).toHaveValue(
-    "Marrakech-Safi",
+    "Casablanca-Settat",
   )
   await expect(page.getByRole("combobox", { name: "History" })).toHaveValue("5")
   await expect(page.locator('button[value="lst"]')).toHaveAttribute("aria-pressed", "true")
@@ -157,7 +171,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect(page.getByText("JSON export downloaded")).toBeVisible()
   await page.getByRole("button", { name: "Use regional centroid" }).click()
   await expect(
-    page.getByText("Monthly climate observations for the Marrakech-Safi regional centroid."),
+    page.getByText("Monthly climate observations for the Casablanca-Settat regional centroid."),
   ).toBeVisible()
   await page.getByRole("button", { name: "Point select" }).click()
   await page.locator('[data-region-name="Marrakech-Safi"]').evaluate((element) => {
@@ -177,6 +191,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
     page.getByRole("heading", { name: "Demonstration satellite indicators" }),
   ).toBeVisible()
   await expect(page.getByText("Validate with in-situ sampling")).toBeVisible()
+  expect(browserErrors).toEqual([])
 })
 
 const latestCompleteYear = new Date().getUTCFullYear() - 1

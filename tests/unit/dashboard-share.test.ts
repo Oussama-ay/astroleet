@@ -7,7 +7,7 @@ import {
 } from "../../lib/domain/dashboard-share"
 
 const radiusState: DashboardShareState = {
-  regionName: "Béni Mellal-Khénifra",
+  regionName: "Casablanca-Settat",
   metric: "lst",
   historyYears: 5,
   location: {
@@ -57,6 +57,17 @@ describe("dashboard share state", () => {
         history: "25",
         mode: "point",
         latitude: "91",
+        longitude: "-8",
+      }),
+    ).toBeNull()
+    expect(
+      parseDashboardShareSearchParams({
+        view: "1",
+        region: "Marrakech-Safi",
+        metric: "ndvi",
+        history: "5",
+        mode: "point",
+        latitude: "40",
         longitude: "-8",
       }),
     ).toBeNull()

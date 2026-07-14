@@ -18,6 +18,46 @@ a {
   color: inherit;
 }
 
+.astroleet-leaflet-map {
+  height: clamp(430px, 65vw, 620px);
+  width: 100%;
+  background: #050607;
+  font-family: var(--font-sans);
+}
+
+.astroleet-leaflet-map .leaflet-tile-pane {
+  filter: grayscale(1) saturate(0.35) brightness(0.42) contrast(1.15);
+}
+
+.astroleet-leaflet-map .leaflet-control-zoom a,
+.astroleet-leaflet-map .leaflet-control-attribution {
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(5, 6, 7, 0.9);
+}
+
+.astroleet-leaflet-map .leaflet-control-zoom a:hover,
+.astroleet-leaflet-map .leaflet-control-zoom a:focus-visible {
+  color: #fff;
+  background: #15191b;
+}
+
+.astroleet-leaflet-map .leaflet-control-attribution a {
+  color: #8fb9d4;
+}
+
+.astroleet-leaflet-map .leaflet-tooltip {
+  color: #eaf2ef;
+  background: rgba(5, 6, 7, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 0;
+  box-shadow: none;
+  font-family: var(--font-mono);
+}
+
+.astroleet-leaflet-map .leaflet-tooltip::before {
+  border-top-color: rgba(255, 255, 255, 0.24);
+}
+
 .hero-action {
   background-image: linear-gradient(#fff, #fff);
   background-position: right center;
