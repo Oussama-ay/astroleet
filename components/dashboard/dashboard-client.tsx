@@ -12,6 +12,7 @@ import LocationControls from "./location-controls"
 import MetricCards from "./metric-cards"
 import HistoryChart from "./history-chart"
 import Recommendations from "./recommendations"
+import ClimateObservations from "./climate-observations"
 
 export default function DashboardClient() {
   const [regionName, setRegionName] = React.useState(REGIONS[6].name) // Marrakech-Safi
@@ -145,6 +146,34 @@ export default function DashboardClient() {
             </Card>
           </Grid>
 
+          {/* Observed climate */}
+          <Grid size={12}>
+            <ClimateObservations region={region} />
+          </Grid>
+
+          {/* Demonstration satellite indicators */}
+          <Grid size={12} sx={{ mt: 1 }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              sx={{ justifyContent: "space-between", alignItems: { sm: "flex-end" } }}
+            >
+              <Box>
+                <Typography component="h2" variant="h5">
+                  Demonstration satellite indicators
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Synthetic values—not live observations. Use them only to explore the interface.
+                </Typography>
+              </Box>
+              <Chip
+                label="Synthetic demonstration"
+                size="small"
+                sx={{ bgcolor: colors.sand, color: "text.secondary", alignSelf: { xs: "flex-start" } }}
+              />
+            </Stack>
+          </Grid>
+
           {/* Metric cards */}
           <Grid size={12}>
             <MetricCards region={region} active={metric} onSelect={setMetric} />
@@ -165,8 +194,9 @@ export default function DashboardClient() {
 
         <Divider sx={{ mt: 5, mb: 2 }} />
         <Typography variant="caption" color="text.secondary">
-          Values shown are synthesised demonstration data modelled on Moroccan agro-climatic
-          gradients. See the methodology page for sources and processing.
+          Satellite indicator values and recommendations are synthesised demonstration data
+          modelled on Moroccan agro-climatic gradients. See the methodology page for sources
+          and processing.
         </Typography>
       </Container>
       </Box>
