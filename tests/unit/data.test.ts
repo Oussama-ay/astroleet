@@ -3,6 +3,7 @@ import {
   METRICS,
   MONTHS,
   REGIONS,
+  environmentalSeriesForRegion,
   historyForRegion,
   metricsForRegion,
   recommendationsForRegion,
@@ -39,6 +40,31 @@ describe("environmental demonstration data", () => {
           expect(value).toBeGreaterThanOrEqual(METRICS[metric].min)
           expect(value).toBeLessThanOrEqual(METRICS[metric].max)
         }
+      }
+    }
+  })
+
+  it("publishes demo values through the auditable environmental contract", () => {
+    for (const region of REGIONS) {
+      for (const metric of metricKeys) {
+        const series = environmentalSeriesForRegion(region, metric)
+
+        expect(series).toMatchObject({
+          schemaVersion: "1.0",
+          parameter: metric,
+          status: "demonstration",
+          coverage: {
+            type: "region",
+            name: region.name,
+          },
+          source: {
+            provider: "Astroleet",
+          },
+        })
+        expect(series.values).toHaveLength(MONTHS.length)
+        expect(series.values.every((entry) => entry.quality.status === "estimated")).toBe(
+          true,
+        )
       }
     }
   })

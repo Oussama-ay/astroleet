@@ -75,7 +75,7 @@ export default function DashboardClient() {
               Last composite
             </Typography>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, fontFamily: "var(--font-mono)" }}>
-              2026 · 12-month window
+              Demo model · 12-month window
             </Typography>
           </Box>
         </Stack>
