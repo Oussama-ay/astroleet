@@ -33,6 +33,8 @@ interface PowerApiResponse {
   meta: {
     provider: string
     cacheTtlSeconds: number
+    method?: string
+    sampleCount?: number
   }
 }
 
@@ -73,12 +75,20 @@ type LoadState =
   | { key: string; status: "success"; response: PowerApiResponse }
   | { key: string; status: "error"; message: string }
 
-export interface ClimateLocation {
-  mode: "region" | "point"
-  label: string
-  latitude: number
-  longitude: number
-}
+export type ClimateLocation =
+  | {
+      mode: "region" | "point"
+      label: string
+      latitude: number
+      longitude: number
+    }
+  | {
+      mode: "radius"
+      label: string
+      latitude: number
+      longitude: number
+      radiusKm: 50 | 100 | 200
+    }
 
 interface ClimateObservationsProps {
   location: ClimateLocation
@@ -93,9 +103,15 @@ export default function ClimateObservations({
   const [loadState, setLoadState] = React.useState<LoadState | null>(null)
   const [draftLatitude, setDraftLatitude] = React.useState(String(location.latitude))
   const [draftLongitude, setDraftLongitude] = React.useState(String(location.longitude))
+  const [draftRadius, setDraftRadius] = React.useState<50 | 100 | 200>(
+    location.mode === "radius" ? location.radiusKm : 100,
+  )
   const pointValidation = validatePoint(draftLatitude, draftLongitude)
-  const requestUrl = `/api/climate/power?latitude=${location.latitude}&longitude=${location.longitude}`
-  const requestKey = `${location.latitude}:${location.longitude}:${attempt}`
+  const requestUrl =
+    location.mode === "radius"
+      ? `/api/climate/power/radius?latitude=${location.latitude}&longitude=${location.longitude}&radiusKm=${location.radiusKm}`
+      : `/api/climate/power?latitude=${location.latitude}&longitude=${location.longitude}`
+  const requestKey = `${location.mode}:${location.latitude}:${location.longitude}:${location.mode === "radius" ? location.radiusKm : "point"}:${attempt}`
   const currentState = loadState?.key === requestKey ? loadState : null
 
   function applyPoint(event: React.FormEvent<HTMLFormElement>) {
@@ -107,6 +123,18 @@ export default function ClimateObservations({
       label: `Exact point ${pointValidation.latitude.toFixed(4)}, ${pointValidation.longitude.toFixed(4)}`,
       latitude: pointValidation.latitude,
       longitude: pointValidation.longitude,
+    })
+  }
+
+  function applyRadius() {
+    if (!pointValidation.valid) return
+
+    onLocationChange({
+      mode: "radius",
+      label: `a ${draftRadius} km radius around ${pointValidation.latitude.toFixed(4)}, ${pointValidation.longitude.toFixed(4)}`,
+      latitude: pointValidation.latitude,
+      longitude: pointValidation.longitude,
+      radiusKm: draftRadius,
     })
   }
 
@@ -158,13 +186,19 @@ export default function ClimateObservations({
         </Box>
         <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
           <Chip
-            label={location.mode === "region" ? "Regional centroid" : "Exact point"}
+            label={
+              location.mode === "region"
+                ? "Regional centroid"
+                : location.mode === "radius"
+                  ? `${location.radiusKm} km radius`
+                  : "Exact point"
+            }
             size="small"
             variant="outlined"
             sx={{ borderColor: colors.line, color: "text.secondary" }}
           />
           <Chip
-            label="Cached observed data"
+            label={location.mode === "radius" ? "Derived radius mean" : "Cached observed data"}
             size="small"
             sx={{ bgcolor: colors.blueSoft, color: colors.blueDark }}
           />
@@ -177,7 +211,7 @@ export default function ClimateObservations({
         sx={{ mt: 2.5, p: 2, border: `1px solid ${colors.line}`, bgcolor: "#0D1012" }}
       >
         <Typography variant="overline" color="text.secondary">
-          Exact climate point
+          Point or radius climate analysis
         </Typography>
         <Stack
           direction={{ xs: "column", sm: "row" }}
@@ -204,10 +238,31 @@ export default function ClimateObservations({
             slotProps={{ htmlInput: { step: "any", min: -180, max: 180 } }}
             sx={{ width: { sm: 170 } }}
           />
+          <TextField
+            select
+            label="Radius"
+            value={draftRadius}
+            onChange={(event) => setDraftRadius(Number(event.target.value) as 50 | 100 | 200)}
+            size="small"
+            slotProps={{ select: { native: true } }}
+            sx={{ width: { sm: 130 } }}
+          >
+            <option value={50}>50 km</option>
+            <option value={100}>100 km</option>
+            <option value={200}>200 km</option>
+          </TextField>
           <Button type="submit" variant="contained" disabled={!pointValidation.valid}>
             Apply point
           </Button>
-          {location.mode === "point" && (
+          <Button
+            type="button"
+            variant="outlined"
+            disabled={!pointValidation.valid}
+            onClick={applyRadius}
+          >
+            Analyze radius
+          </Button>
+          {location.mode !== "region" && (
             <Button type="button" variant="outlined" onClick={() => onLocationChange(null)}>
               Use regional centroid
             </Button>
@@ -215,7 +270,7 @@ export default function ClimateObservations({
         </Stack>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
           {pointValidation.valid
-            ? "Enter coordinates for any exact point. Astroleet does not save this selection."
+            ? "Radius analysis averages the center and four boundary samples. The 50 km minimum respects POWER's native meteorological grid; it is an estimate, not a complete area scan."
             : pointValidation.message}
         </Typography>
       </Box>
@@ -362,6 +417,11 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
               <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
                 {formatPeriod(provenance)} · {provenance.resolution.spatial} · {provenance.resolution.temporal}
               </Typography>
+              {provenance.coverage.type === "radius" && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                  Derived mean of {provenance.coverage.sampleCount} samples across a {provenance.coverage.radiusKm} km radius
+                </Typography>
+              )}
               <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
                 Retrieved and normalized {formatProcessedAt(provenance.processedAt)}
               </Typography>

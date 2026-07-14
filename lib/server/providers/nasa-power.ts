@@ -79,7 +79,7 @@ export class NasaPowerError extends Error {
   }
 }
 
-interface FetchNasaPowerOptions {
+export interface FetchNasaPowerOptions {
   fetcher?: typeof fetch
   now?: () => Date
   timeoutMs?: number

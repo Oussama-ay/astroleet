@@ -161,7 +161,7 @@ export default function DashboardClient() {
           {/* Observed climate */}
           <Grid size={12}>
             <ClimateObservations
-              key={`${climateLocation.mode}:${climateLocation.latitude}:${climateLocation.longitude}`}
+              key={`${climateLocation.mode}:${climateLocation.latitude}:${climateLocation.longitude}:${climateLocation.mode === "radius" ? climateLocation.radiusKm : "point"}`}
               location={climateLocation}
               onLocationChange={setClimatePoint}
             />
