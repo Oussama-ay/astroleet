@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto"
 import { NextResponse } from "next/server"
+import { isAIExplanationConfigured } from "@/lib/server/ai-provider-config"
 
 export const runtime = "nodejs"
 
@@ -11,7 +12,7 @@ export async function GET() {
       status: "ok",
       services: {
         nasaPower: "route_available",
-        aiExplanation: process.env.OPENAI_API_KEY?.trim()
+        aiExplanation: isAIExplanationConfigured()
           ? "configured"
           : "optional_unconfigured",
       },

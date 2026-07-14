@@ -16,6 +16,7 @@ import {
 } from "@/lib/server/request-rate-limit"
 
 export const runtime = "nodejs"
+export const maxDuration = 60
 
 export async function POST(request: NextRequest) {
   const requestId = randomUUID()
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
       {
         data: { explanation: result.explanation },
         meta: {
-          provider: "OpenAI",
+          provider: result.provider,
           model: result.model,
           generatedAt: new Date().toISOString(),
           requestId,
@@ -73,7 +74,11 @@ export async function POST(request: NextRequest) {
       },
       200,
       "success",
-      { model: result.model, signalCount: assessment.signals.length },
+      {
+        provider: result.provider,
+        model: result.model,
+        signalCount: assessment.signals.length,
+      },
     )
   } catch (error) {
     if (error instanceof ZodError || error instanceof SyntaxError) {
@@ -135,7 +140,12 @@ function createResponder(requestId: string, startedAt: number, rateLimit: RateLi
     body: object,
     status: number,
     outcome: "success" | "rejected" | "failed",
-    details: { errorCode?: string; model?: string; signalCount?: number },
+    details: {
+      errorCode?: string
+      provider?: "OpenAI" | "OpenRouter"
+      model?: string
+      signalCount?: number
+    },
     extraHeaders?: Record<string, string>,
   ) => {
     logOperationalEvent({
