@@ -81,7 +81,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await page.getByRole("combobox", { name: "History" }).selectOption("5")
   await page.locator('button[value="lst"]').click()
   await page.getByRole("button", { name: "Share analysis" }).click()
-  await expect(page.getByRole("status")).toHaveText("Analysis link copied")
+  await expect(page.getByText("Analysis link copied")).toBeVisible()
 
   const sharedUrl = page.url()
   const sharedParams = new URL(sharedUrl).searchParams
@@ -106,6 +106,21 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect.poll(() => radiusRequests.at(-1)).toContain(
     `radiusKm=100&start=${historicalStartYear}&end=${latestCompleteYear}`,
   )
+  const csvDownloadPromise = page.waitForEvent("download")
+  await page.getByRole("button", { name: "Export CSV" }).click()
+  const csvDownload = await csvDownloadPromise
+  expect(csvDownload.suggestedFilename()).toBe(
+    `astroleet-climate-radius-${latestCompleteYear}.csv`,
+  )
+  await expect(page.getByText("CSV export downloaded")).toBeVisible()
+
+  const jsonDownloadPromise = page.waitForEvent("download")
+  await page.getByRole("button", { name: "Export JSON" }).click()
+  const jsonDownload = await jsonDownloadPromise
+  expect(jsonDownload.suggestedFilename()).toBe(
+    `astroleet-climate-radius-${latestCompleteYear}.json`,
+  )
+  await expect(page.getByText("JSON export downloaded")).toBeVisible()
   await page.getByRole("button", { name: "Use regional centroid" }).click()
   await expect(
     page.getByText("Monthly climate observations for the Marrakech-Safi regional centroid."),
