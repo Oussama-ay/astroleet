@@ -1,3 +1,4 @@
+import OpenAI from "openai"
 import { describe, expect, it } from "vitest"
 import type { EnvironmentalSeries } from "../../lib/domain/environment"
 import {
@@ -8,6 +9,7 @@ import {
 import { assessObservedClimate } from "../../lib/domain/observed-climate-recommendations"
 import {
   buildAIClimateContext,
+  classifyAIProviderError,
   generateAIClimateExplanation,
 } from "../../lib/server/openai-climate-explanation"
 
@@ -83,6 +85,7 @@ describe("AI climate explanation contract", () => {
           provider: "OpenAI",
           model: "gpt-5.6-luna",
           generatedAt: "2026-07-14T16:00:00.000Z",
+          requestId: "ad2fb018-43df-4b1d-892e-560cd6614c1d",
         },
       }),
     ).not.toThrow()
@@ -107,6 +110,35 @@ describe("AI climate explanation contract", () => {
       if (previousKey === undefined) delete process.env.OPENAI_API_KEY
       else process.env.OPENAI_API_KEY = previousKey
     }
+  })
+
+  it("distinguishes provider quota, rate limit, authentication, and timeout errors", () => {
+    const headers = new Headers()
+    const quota = new OpenAI.RateLimitError(
+      429,
+      { code: "insufficient_quota" },
+      "quota exhausted",
+      headers,
+    )
+    const throttled = new OpenAI.RateLimitError(
+      429,
+      { code: "rate_limit_exceeded" },
+      "slow down",
+      headers,
+    )
+    const authentication = new OpenAI.AuthenticationError(
+      401,
+      { code: "invalid_api_key" },
+      "invalid key",
+      headers,
+    )
+
+    expect(classifyAIProviderError(quota).code).toBe("quota_exceeded")
+    expect(classifyAIProviderError(throttled).code).toBe("rate_limited")
+    expect(classifyAIProviderError(authentication).code).toBe("authentication_failed")
+    expect(
+      classifyAIProviderError(new OpenAI.APIConnectionTimeoutError()).code,
+    ).toBe("timeout")
   })
 })
 

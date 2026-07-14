@@ -82,6 +82,7 @@ export const aiClimateExplainResponseSchema = z.strictObject({
     provider: z.literal("OpenAI"),
     model: z.string().min(1),
     generatedAt: z.iso.datetime({ offset: true }),
+    requestId: z.uuid(),
   }),
 })
 
