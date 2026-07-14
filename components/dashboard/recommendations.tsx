@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, Stack, Chip } from "@mui/material"
+import { Box, Typography, Stack } from "@mui/material"
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh"
 import WarningAmberIcon from "@mui/icons-material/WarningAmber"
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
@@ -22,28 +22,40 @@ export default function Recommendations({ region }: { region: Region }) {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.25} sx={{ mb: 0.5, alignItems: "center" }}>
-        <ScienceOutlinedIcon sx={{ color: "secondary.main" }} />
-        <Typography variant="h6">Evidence-based recommendations</Typography>
+      <Typography variant="overline" color="text.secondary">
+        Synthetic guidance
+      </Typography>
+      <Stack direction="row" spacing={1.25} sx={{ mt: 0.25, mb: 0.5, alignItems: "center" }}>
+        <ScienceOutlinedIcon sx={{ color: colors.amber }} />
+        <Typography variant="h6">Model recommendations</Typography>
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-        Generated from current indicator values for {region.name}. Each action cites the
-        measurement that triggered it.
+        Generated from demonstration values for {region.name}. Each action identifies the
+        synthetic measurement that triggered it.
       </Typography>
 
-      <Stack spacing={1.5}>
+      <Stack>
         {recs.map((rec) => {
           const s = STYLE[rec.severity]
           return (
             <Box
               key={rec.id}
               sx={{
+                position: "relative",
                 display: "flex",
                 gap: 1.75,
-                p: 2,
-                borderRadius: 0,
-                border: `1px solid ${colors.line}`,
-                bgcolor: "#0D1012",
+                py: 2,
+                pl: 2,
+                borderTop: `1px solid ${colors.line}`,
+                "&::before": {
+                  content: '\"\"',
+                  position: "absolute",
+                  left: 0,
+                  top: 20,
+                  bottom: 20,
+                  width: 2,
+                  bgcolor: s.fg,
+                },
               }}
             >
               <Box
@@ -62,15 +74,17 @@ export default function Recommendations({ region }: { region: Region }) {
                 {s.icon}
               </Box>
               <Box sx={{ flexGrow: 1 }}>
-                <Stack direction="row" spacing={1} sx={{ mb: 0.5, flexWrap: "wrap", alignItems: "center" }}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ mb: 0.5, justifyContent: "space-between", flexWrap: "wrap", alignItems: "center" }}
+                >
                   <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                     {rec.title}
                   </Typography>
-                  <Chip
-                    label={s.label}
-                    size="small"
-                    sx={{ bgcolor: s.bg, color: s.fg, height: 20, fontSize: 11 }}
-                  />
+                  <Typography variant="overline" sx={{ color: s.fg }}>
+                    {s.label}
+                  </Typography>
                 </Stack>
                 <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.55 }}>
                   {rec.detail}
@@ -82,11 +96,6 @@ export default function Recommendations({ region }: { region: Region }) {
                     mt: 1,
                     fontFamily: "var(--font-mono)",
                     color: "text.secondary",
-                    bgcolor: colors.sandSoft,
-                    px: 1,
-                    py: 0.4,
-                    borderRadius: 0,
-                    border: `1px solid ${colors.line}`,
                   }}
                 >
                   basis: {rec.basis}

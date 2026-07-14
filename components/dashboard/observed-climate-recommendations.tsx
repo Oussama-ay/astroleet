@@ -1,8 +1,6 @@
 import {
   Alert,
   Box,
-  Chip,
-  Divider,
   Stack,
   Typography,
 } from "@mui/material"
@@ -51,25 +49,27 @@ export default function ObservedClimateRecommendations({
   const assessment = assessObservedClimate(series)
 
   return (
-    <Box component="section" aria-labelledby="observed-climate-signals-title" sx={{ mt: 3 }}>
-      <Divider sx={{ mb: 2.5 }} />
+    <Box
+      component="section"
+      aria-labelledby="observed-climate-signals-title"
+      sx={{ p: { xs: 2, md: 3 }, height: "100%" }}
+    >
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={1}
         sx={{ justifyContent: "space-between", alignItems: { sm: "center" }, mb: 0.75 }}
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <RuleOutlinedIcon sx={{ color: colors.green }} />
-          <Typography id="observed-climate-signals-title" component="h3" variant="h6">
-            Observed climate signals
+        <Box>
+          <Typography variant="overline" color="text.secondary">
+            Deterministic screening
           </Typography>
-        </Stack>
-        <Chip
-          label="Deterministic screening"
-          size="small"
-          variant="outlined"
-          sx={{ alignSelf: { xs: "flex-start", sm: "auto" }, borderColor: colors.line }}
-        />
+          <Stack direction="row" spacing={1} sx={{ mt: 0.25, alignItems: "center" }}>
+            <RuleOutlinedIcon sx={{ color: colors.green }} />
+            <Typography id="observed-climate-signals-title" component="h3" variant="h5">
+              Observed signals
+            </Typography>
+          </Stack>
+        </Box>
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
         Latest month compared with the median for the same calendar month in prior years. This is
@@ -95,7 +95,21 @@ export default function ObservedClimateRecommendations({
               return (
                 <Box
                   key={signal.id}
-                  sx={{ p: 2, border: `1px solid ${colors.line}`, bgcolor: "#0D1012" }}
+                  sx={{
+                    position: "relative",
+                    py: 2,
+                    pl: 2,
+                    borderTop: `1px solid ${colors.line}`,
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      left: 0,
+                      top: 20,
+                      bottom: 20,
+                      width: 2,
+                      bgcolor: style.color,
+                    },
+                  }}
                 >
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
@@ -119,11 +133,9 @@ export default function ObservedClimateRecommendations({
                         {signal.title}
                       </Typography>
                     </Stack>
-                    <Chip
-                      label={style.label}
-                      size="small"
-                      sx={{ alignSelf: { xs: "flex-start", sm: "auto" }, bgcolor: style.background, color: style.color }}
-                    />
+                    <Typography variant="overline" sx={{ color: style.color }}>
+                      {style.label}
+                    </Typography>
                   </Stack>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                     {signal.summary}
@@ -149,7 +161,7 @@ export default function ObservedClimateRecommendations({
         </>
       )}
 
-      <Box sx={{ mt: 2, p: 1.5, borderLeft: `3px solid ${colors.line}`, bgcolor: colors.sandSoft }}>
+      <Box sx={{ mt: 2, pt: 1.5, borderTop: `1px solid ${colors.line}` }}>
         <Typography variant="caption" color="text.secondary">
           Screening rules: temperature ≥ +{OBSERVED_CLIMATE_THRESHOLDS.warmTemperatureDeltaC}°C;
           dry precipitation ≤ {OBSERVED_CLIMATE_THRESHOLDS.dryPrecipitationRatio * 100}% and at

@@ -25,7 +25,12 @@ export default function HistoryChart({ region, metric }: Props) {
     <Box>
       <Stack direction="row" sx={{ mb: 1, justifyContent: "space-between", alignItems: "baseline" }}>
         <Box>
-          <Typography variant="h6">Twelve-month history</Typography>
+          <Typography variant="overline" color="text.secondary">
+            Synthetic composite
+          </Typography>
+          <Typography variant="h6" sx={{ mt: 0.25 }}>
+            Twelve-month model
+          </Typography>
           <Typography variant="body2" color="text.secondary">
             {def.label} · {region.name}
           </Typography>

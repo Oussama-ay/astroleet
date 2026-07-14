@@ -44,7 +44,7 @@ export default function ClimateHistory({ series }: { series: EnvironmentalSeries
   return (
     <Box
       aria-label="Observed climate history"
-      sx={{ mt: 2.5, p: { xs: 1.5, md: 2 }, border: `1px solid ${colors.line}`, bgcolor: "#0D1012" }}
+      sx={{ p: { xs: 2, md: 3 }, height: "100%" }}
     >
       <Stack
         direction={{ xs: "column", md: "row" }}
@@ -52,8 +52,11 @@ export default function ClimateHistory({ series }: { series: EnvironmentalSeries
         sx={{ justifyContent: "space-between", alignItems: { md: "flex-start" } }}
       >
         <Box>
-          <Typography component="h3" variant="h6">
-            Observed climate history
+          <Typography variant="overline" color="text.secondary">
+            Historical comparison
+          </Typography>
+          <Typography component="h3" variant="h5" sx={{ mt: 0.25 }}>
+            Monthly record
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {activeSeries.values.length} monthly observations · {formatPeriod(activeSeries)}
@@ -65,9 +68,17 @@ export default function ClimateHistory({ series }: { series: EnvironmentalSeries
               key={candidate.parameter}
               type="button"
               size="small"
-              variant={candidate.parameter === parameter ? "contained" : "outlined"}
+              variant="text"
               aria-pressed={candidate.parameter === parameter}
               onClick={() => setParameter(candidate.parameter)}
+              sx={{
+                px: 1.25,
+                color:
+                  candidate.parameter === parameter ? candidate.color : "text.secondary",
+                borderBottom: `2px solid ${
+                  candidate.parameter === parameter ? candidate.color : "transparent"
+                }`,
+              }}
             >
               {candidate.label}
             </Button>
@@ -75,9 +86,9 @@ export default function ClimateHistory({ series }: { series: EnvironmentalSeries
         </Stack>
       </Stack>
 
-      <Box sx={{ width: "100%", height: 300, mt: 1 }}>
+      <Box sx={{ width: "100%", height: 320, mt: 1.5 }}>
         <LineChart
-          height={300}
+          height={320}
           margin={{ left: 12, right: 16, top: 16, bottom: 30 }}
           xAxis={[
             {
