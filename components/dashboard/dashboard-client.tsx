@@ -15,6 +15,7 @@ import Recommendations from "./recommendations"
 import ClimateObservations, { type ClimateLocation } from "./climate-observations"
 import type { ClimateHistoryYears } from "@/lib/domain/climate-history"
 import type { DashboardShareState } from "@/lib/domain/dashboard-share"
+import { regionForMoroccoPoint } from "@/lib/domain/morocco-geography"
 
 export default function DashboardClient({
   initialShareState,
@@ -60,6 +61,15 @@ export default function DashboardClient({
       latitude,
       longitude,
     })
+  }
+
+  function setClimateLocation(location: ClimateLocation | null) {
+    if (location) {
+      const containingRegion = regionForMoroccoPoint(location.latitude, location.longitude)
+      if (!containingRegion) return
+      setRegionName(containingRegion)
+    }
+    setClimatePoint(location)
   }
 
   return (
@@ -199,7 +209,7 @@ export default function DashboardClient({
             <ClimateObservations
               key={`${climateLocation.mode}:${climateLocation.latitude}:${climateLocation.longitude}:${climateLocation.mode === "radius" ? climateLocation.radiusKm : "point"}`}
               location={climateLocation}
-              onLocationChange={setClimatePoint}
+              onLocationChange={setClimateLocation}
               historyYears={climateHistoryYears}
               onHistoryYearsChange={setClimateHistoryYears}
               shareState={shareState}

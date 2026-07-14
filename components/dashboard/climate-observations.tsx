@@ -33,6 +33,10 @@ import type {
   DashboardClimateLocation,
   DashboardShareState,
 } from "@/lib/domain/dashboard-share"
+import {
+  isPointInsideMorocco,
+  MOROCCO_GEOGRAPHIC_BOUNDS,
+} from "@/lib/domain/morocco-geography"
 import { colors } from "@/lib/theme"
 import ClimateHistory from "./climate-history"
 import DashboardShareActions from "./dashboard-share-actions"
@@ -240,7 +244,13 @@ export default function ClimateObservations({
             size="small"
             type="number"
             error={!pointValidation.valid && pointValidation.field === "latitude"}
-            slotProps={{ htmlInput: { step: "any", min: -90, max: 90 } }}
+            slotProps={{
+              htmlInput: {
+                step: "any",
+                min: MOROCCO_GEOGRAPHIC_BOUNDS.south,
+                max: MOROCCO_GEOGRAPHIC_BOUNDS.north,
+              },
+            }}
             sx={{ width: { sm: 170 } }}
           />
           <TextField
@@ -250,7 +260,13 @@ export default function ClimateObservations({
             size="small"
             type="number"
             error={!pointValidation.valid && pointValidation.field === "longitude"}
-            slotProps={{ htmlInput: { step: "any", min: -180, max: 180 } }}
+            slotProps={{
+              htmlInput: {
+                step: "any",
+                min: MOROCCO_GEOGRAPHIC_BOUNDS.west,
+                max: MOROCCO_GEOGRAPHIC_BOUNDS.east,
+              },
+            }}
             sx={{ width: { sm: 170 } }}
           />
           <TextField
@@ -358,6 +374,14 @@ function validatePoint(latitudeInput: string, longitudeInput: string): PointVali
       valid: false,
       field: "longitude",
       message: "Longitude must be a number between −180 and 180.",
+    }
+  }
+
+  if (!isPointInsideMorocco(latitude, longitude)) {
+    return {
+      valid: false,
+      field: "latitude",
+      message: "Select a point inside Morocco's mapped regions.",
     }
   }
 

@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { REGIONS, type MetricKey } from "../data"
 import type { ClimateHistoryYears } from "./climate-history"
+import { regionForMoroccoPoint } from "./morocco-geography"
 
 export type DashboardClimateLocation =
   | {
@@ -89,9 +90,12 @@ export function parseDashboardShareSearchParams(
   if (!coordinates.success) return null
 
   const { latitude, longitude } = coordinates.data
+  const coordinateRegion = regionForMoroccoPoint(latitude, longitude)
+  if (!coordinateRegion) return null
+
   if (base.data.mode === "point") {
     return {
-      regionName: region.name,
+      regionName: coordinateRegion,
       metric: base.data.metric,
       historyYears: base.data.history,
       location: {
@@ -107,7 +111,7 @@ export function parseDashboardShareSearchParams(
   if (!radius.success) return null
 
   return {
-    regionName: region.name,
+    regionName: coordinateRegion,
     metric: base.data.metric,
     historyYears: base.data.history,
     location: {
