@@ -2,6 +2,8 @@ import { z } from "zod"
 
 export const POWER_FIRST_YEAR = 1981
 export const POWER_MAX_YEAR_SPAN = 10
+export const POWER_RADIUS_OPTIONS = [50, 100, 200] as const
+export type PowerRadiusKm = (typeof POWER_RADIUS_OPTIONS)[number]
 
 const decimalStringSchema = z
   .string()
@@ -53,6 +55,10 @@ export interface PowerClimateQuery {
   end: number
 }
 
+export interface PowerRadiusQuery extends PowerClimateQuery {
+  radiusKm: PowerRadiusKm
+}
+
 export function parsePowerClimateSearchParams(
   searchParams: URLSearchParams,
   now = new Date(),
@@ -66,4 +72,18 @@ export function parsePowerClimateSearchParams(
     start: searchParams.get("start") ?? defaultYear,
     end: searchParams.get("end") ?? defaultYear,
   })
+}
+
+export function parsePowerRadiusSearchParams(
+  searchParams: URLSearchParams,
+  now = new Date(),
+): PowerRadiusQuery {
+  const query = parsePowerClimateSearchParams(searchParams, now)
+  const radiusKm = z
+    .enum(POWER_RADIUS_OPTIONS.map(String) as [string, ...string[]])
+    .transform(Number)
+    .pipe(z.union([z.literal(50), z.literal(100), z.literal(200)]))
+    .parse(searchParams.get("radiusKm"))
+
+  return { ...query, radiusKm }
 }

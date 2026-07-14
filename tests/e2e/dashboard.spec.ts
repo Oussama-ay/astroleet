@@ -2,6 +2,14 @@ import { expect, test } from "@playwright/test"
 
 test("dashboard loads its core monitoring experience", async ({ page }) => {
   const climateRequests: string[] = []
+  const radiusRequests: string[] = []
+  await page.route("**/api/climate/power/radius?**", async (route) => {
+    radiusRequests.push(route.request().url())
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify(radiusPowerResponse),
+    })
+  })
   await page.route("**/api/climate/power?**", async (route) => {
     climateRequests.push(route.request().url())
     await route.fulfill({
@@ -34,6 +42,15 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await page.getByRole("button", { name: "Apply point" }).click()
   await expect(page.getByText("Monthly climate observations for Exact point 33.5700, -7.5900.")).toBeVisible()
   await expect.poll(() => climateRequests.at(-1)).toContain("latitude=33.57&longitude=-7.59")
+  await page.getByRole("button", { name: "Analyze radius" }).click()
+  await expect(
+    page.getByText("Monthly climate observations for a 100 km radius around 33.5700, -7.5900."),
+  ).toBeVisible()
+  await expect.poll(() => radiusRequests.at(-1)).toContain(
+    "latitude=33.57&longitude=-7.59&radiusKm=100",
+  )
+  await expect(page.getByText("Derived radius mean")).toBeVisible()
+  await expect(page.getByText("Derived mean of 5 samples across a 100 km radius")).toBeVisible()
   await page.getByRole("button", { name: "Use regional centroid" }).click()
   await expect(
     page.getByText("Monthly climate observations for the Marrakech-Safi regional centroid."),
@@ -98,6 +115,36 @@ const powerResponse = {
   },
   meta: {
     provider: "NASA POWER",
+    cacheTtlSeconds: 86400,
+  },
+}
+
+const radiusPowerResponse = {
+  data: {
+    series: powerResponse.data.series.map((series) => ({
+      ...series,
+      coverage: {
+        type: "radius",
+        label: "100 km radius around 33.57, -7.59",
+        center: { latitude: 33.57, longitude: -7.59 },
+        radiusKm: 100,
+        sampleCount: 5,
+      },
+      status: "derived",
+      values: series.values.map((value) => ({
+        ...value,
+        quality: {
+          status: "estimated",
+          flags: ["radius-mean", "five-point-sample"],
+          notes: ["Arithmetic mean of five point samples"],
+        },
+      })),
+    })),
+  },
+  meta: {
+    provider: "NASA POWER",
+    method: "five-point-radius-mean",
+    sampleCount: 5,
     cacheTtlSeconds: 86400,
   },
 }

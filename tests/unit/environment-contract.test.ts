@@ -93,4 +93,20 @@ describe("environmental data contract", () => {
 
     expect(result.success).toBe(false)
   })
+
+  it("supports explicit sampled-radius coverage", () => {
+    const result = environmentalSeriesSchema.safeParse({
+      ...validSeries,
+      coverage: {
+        type: "radius",
+        label: "100 km around Marrakech",
+        center: { latitude: 31.63, longitude: -8 },
+        radiusKm: 100,
+        sampleCount: 5,
+      },
+      status: "derived",
+    })
+
+    expect(result.success).toBe(true)
+  })
 })

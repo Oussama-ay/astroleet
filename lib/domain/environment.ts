@@ -37,6 +37,13 @@ export const geographicCoverageSchema = z.discriminatedUnion("type", [
     name: z.string().min(1),
     centroid: coordinateSchema,
   }),
+  z.strictObject({
+    type: z.literal("radius"),
+    label: z.string().min(1).optional(),
+    center: coordinateSchema,
+    radiusKm: z.number().finite().positive(),
+    sampleCount: z.number().int().positive(),
+  }),
 ])
 export type GeographicCoverage = z.infer<typeof geographicCoverageSchema>
 
