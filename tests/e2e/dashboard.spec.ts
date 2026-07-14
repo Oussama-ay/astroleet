@@ -66,6 +66,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await page.getByRole("button", { name: "Apply point" }).click()
   await expect(page.getByText("Monthly climate observations for Exact point 33.5700, -7.5900.")).toBeVisible()
   await expect.poll(() => climateRequests.at(-1)).toContain("latitude=33.57&longitude=-7.59")
+  await expect(page.getByLabel("Selected analysis point")).toBeVisible()
   await page.getByRole("button", { name: "Analyze radius" }).click()
   await expect(
     page.getByText("Monthly climate observations for a 100 km radius around 33.5700, -7.5900."),
@@ -75,6 +76,8 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   )
   await expect(page.getByText("Derived radius mean")).toBeVisible()
   await expect(page.getByText("Derived mean of 5 samples across a 100 km radius")).toBeVisible()
+  await expect(page.getByLabel("100 km analysis radius")).toBeVisible()
+  await expect(page.getByText("Dashed outline · 100 km radius")).toBeVisible()
   await page.getByRole("combobox", { name: "History" }).selectOption("5")
   await page.locator('button[value="lst"]').click()
   await page.getByRole("button", { name: "Share analysis" }).click()
@@ -99,6 +102,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect(
     page.getByText("Monthly climate observations for a 100 km radius around 33.5700, -7.5900."),
   ).toBeVisible()
+  await expect(page.getByLabel("100 km analysis radius")).toBeVisible()
   await expect.poll(() => radiusRequests.at(-1)).toContain(
     `radiusKm=100&start=${historicalStartYear}&end=${latestCompleteYear}`,
   )
@@ -106,6 +110,20 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect(
     page.getByText("Monthly climate observations for the Marrakech-Safi regional centroid."),
   ).toBeVisible()
+  await page.getByRole("button", { name: "Point select" }).click()
+  await page.locator('[data-region-name="Marrakech-Safi"]').evaluate((element) => {
+    const bounds = element.getBoundingClientRect()
+    element.dispatchEvent(
+      new MouseEvent("click", {
+        bubbles: true,
+        clientX: bounds.left + bounds.width / 2,
+        clientY: bounds.top + bounds.height / 2,
+      }),
+    )
+  })
+  await expect(page.getByText(/Monthly climate observations for Exact point/)).toBeVisible()
+  await expect(page.getByLabel("Selected analysis point")).toBeVisible()
+  await expect.poll(() => climateRequests.at(-1)).toContain("/api/climate/power?latitude=")
   await expect(
     page.getByRole("heading", { name: "Demonstration satellite indicators" }),
   ).toBeVisible()

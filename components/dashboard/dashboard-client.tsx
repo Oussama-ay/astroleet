@@ -52,6 +52,16 @@ export default function DashboardClient({
     setClimatePoint(null)
   }
 
+  function selectMapPoint(name: string, latitude: number, longitude: number) {
+    setRegionName(name)
+    setClimatePoint({
+      mode: "point",
+      label: `Exact point ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+      latitude,
+      longitude,
+    })
+  }
+
   return (
     <PageShell>
       <Box
@@ -171,10 +181,16 @@ export default function DashboardClient({
               <Stack direction="row" sx={{ mb: 2, justifyContent: "space-between", alignItems: "center" }}>
                 <Typography variant="h6" sx={{ textTransform: "uppercase" }}>Morocco map explorer</Typography>
                 <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                  Select a region to inspect
+                  Select a region or exact point
                 </Typography>
               </Stack>
-              <MoroccoMap metric={metric} selected={regionName} onSelect={selectRegion} />
+              <MoroccoMap
+                metric={metric}
+                selected={regionName}
+                location={climateLocation}
+                onRegionSelect={selectRegion}
+                onPointSelect={selectMapPoint}
+              />
             </Card>
           </Grid>
 
