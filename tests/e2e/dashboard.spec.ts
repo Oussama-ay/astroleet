@@ -12,9 +12,14 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   })
   await page.route("**/api/climate/power?**", async (route) => {
     climateRequests.push(route.request().url())
+    const requestUrl = new URL(route.request().url())
     await route.fulfill({
       contentType: "application/json",
-      body: JSON.stringify(powerResponse),
+      body: JSON.stringify(
+        requestUrl.searchParams.get("start") === String(historicalStartYear)
+          ? historicalPowerResponse
+          : powerResponse,
+      ),
     })
   })
 
@@ -34,6 +39,21 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   ).toBeVisible()
   await expect(page.getByLabel("Air temperature observed value")).toContainText("12.30°C")
   await expect(page.getByText("Cached observed data")).toBeVisible()
+  await page.getByRole("combobox", { name: "History" }).selectOption("5")
+  await expect.poll(() => climateRequests.at(-1)).toContain(
+    `start=${historicalStartYear}&end=${latestCompleteYear}`,
+  )
+  await expect(page.getByText("5-year history")).toBeVisible()
+  await expect(
+    page.getByText(`60 monthly observations · ${historicalStartYear}–${latestCompleteYear}`),
+  ).toBeVisible()
+  await page.getByRole("button", { name: "Precipitation" }).click()
+  await expect(page.getByRole("button", { name: "Precipitation" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  )
+  await page.getByRole("combobox", { name: "History" }).selectOption("1")
+  await expect(page.getByText("1-year history")).toBeVisible()
   await page.getByLabel("Latitude").fill("91")
   await expect(page.getByRole("button", { name: "Apply point" })).toBeDisabled()
   await expect(page.getByText("Latitude must be a number between −90 and 90.")).toBeVisible()
@@ -61,6 +81,9 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect(page.getByText("Validate with in-situ sampling")).toBeVisible()
 })
 
+const latestCompleteYear = new Date().getUTCFullYear() - 1
+const historicalStartYear = latestCompleteYear - 4
+
 const baseSeries = {
   schemaVersion: "1.0",
   coverage: {
@@ -70,8 +93,8 @@ const baseSeries = {
     longitude: -8,
   },
   period: {
-    start: "2025-01-01T00:00:00.000Z",
-    end: "2025-12-31T23:59:59.999Z",
+    start: `${latestCompleteYear}-01-01T00:00:00.000Z`,
+    end: `${latestCompleteYear}-12-31T23:59:59.999Z`,
     aggregation: "monthly",
   },
   source: {
@@ -84,7 +107,7 @@ const baseSeries = {
     spatial: "0.5° latitude × 0.625° longitude meteorological grid",
     temporal: "Monthly average",
   },
-  processedAt: "2026-01-02T00:00:00.000Z",
+  processedAt: `${latestCompleteYear + 1}-01-02T00:00:00.000Z`,
   status: "cached",
 }
 
@@ -97,19 +120,19 @@ const powerResponse = {
         ...baseSeries,
         parameter: "air_temperature",
         unit: "°C",
-        values: [{ observedAt: "2025-12-01T00:00:00.000Z", value: 12.3, quality }],
+        values: [{ observedAt: `${latestCompleteYear}-12-01T00:00:00.000Z`, value: 12.3, quality }],
       },
       {
         ...baseSeries,
         parameter: "precipitation",
         unit: "mm/day",
-        values: [{ observedAt: "2025-12-01T00:00:00.000Z", value: 1.2, quality }],
+        values: [{ observedAt: `${latestCompleteYear}-12-01T00:00:00.000Z`, value: 1.2, quality }],
       },
       {
         ...baseSeries,
         parameter: "relative_humidity",
         unit: "%",
-        values: [{ observedAt: "2025-12-01T00:00:00.000Z", value: 58.4, quality }],
+        values: [{ observedAt: `${latestCompleteYear}-12-01T00:00:00.000Z`, value: 58.4, quality }],
       },
     ],
   },
@@ -117,6 +140,28 @@ const powerResponse = {
     provider: "NASA POWER",
     cacheTtlSeconds: 86400,
   },
+}
+
+const historicalPowerResponse = {
+  data: {
+    series: powerResponse.data.series.map((series, seriesIndex) => ({
+      ...series,
+      period: {
+        ...series.period,
+        start: `${historicalStartYear}-01-01T00:00:00.000Z`,
+      },
+      values: Array.from({ length: 60 }, (_, index) => {
+        const year = historicalStartYear + Math.floor(index / 12)
+        const month = (index % 12) + 1
+        return {
+          observedAt: `${year}-${String(month).padStart(2, "0")}-01T00:00:00.000Z`,
+          value: Number((10 + seriesIndex * 20 + index * 0.1).toFixed(2)),
+          quality,
+        }
+      }),
+    })),
+  },
+  meta: powerResponse.meta,
 }
 
 const radiusPowerResponse = {

@@ -13,11 +13,13 @@ import MetricCards from "./metric-cards"
 import HistoryChart from "./history-chart"
 import Recommendations from "./recommendations"
 import ClimateObservations, { type ClimateLocation } from "./climate-observations"
+import type { ClimateHistoryYears } from "@/lib/domain/climate-history"
 
 export default function DashboardClient() {
   const [regionName, setRegionName] = React.useState(REGIONS[6].name) // Marrakech-Safi
   const [metric, setMetric] = React.useState<MetricKey>("ndvi")
   const [climatePoint, setClimatePoint] = React.useState<ClimateLocation | null>(null)
+  const [climateHistoryYears, setClimateHistoryYears] = React.useState<ClimateHistoryYears>(1)
 
   const region = REGIONS.find((r) => r.name === regionName) ?? REGIONS[0]
   const climateLocation: ClimateLocation = climatePoint ?? {
@@ -164,6 +166,8 @@ export default function DashboardClient() {
               key={`${climateLocation.mode}:${climateLocation.latitude}:${climateLocation.longitude}:${climateLocation.mode === "radius" ? climateLocation.radiusKm : "point"}`}
               location={climateLocation}
               onLocationChange={setClimatePoint}
+              historyYears={climateHistoryYears}
+              onHistoryYearsChange={setClimateHistoryYears}
             />
           </Grid>
 
