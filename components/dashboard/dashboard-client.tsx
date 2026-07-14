@@ -14,12 +14,24 @@ import HistoryChart from "./history-chart"
 import Recommendations from "./recommendations"
 import ClimateObservations, { type ClimateLocation } from "./climate-observations"
 import type { ClimateHistoryYears } from "@/lib/domain/climate-history"
+import type { DashboardShareState } from "@/lib/domain/dashboard-share"
 
-export default function DashboardClient() {
-  const [regionName, setRegionName] = React.useState(REGIONS[6].name) // Marrakech-Safi
-  const [metric, setMetric] = React.useState<MetricKey>("ndvi")
-  const [climatePoint, setClimatePoint] = React.useState<ClimateLocation | null>(null)
-  const [climateHistoryYears, setClimateHistoryYears] = React.useState<ClimateHistoryYears>(1)
+export default function DashboardClient({
+  initialShareState,
+}: {
+  initialShareState: DashboardShareState | null
+}) {
+  const defaultRegion = REGIONS[6]
+  const [regionName, setRegionName] = React.useState(
+    initialShareState?.regionName ?? defaultRegion.name,
+  )
+  const [metric, setMetric] = React.useState<MetricKey>(initialShareState?.metric ?? "ndvi")
+  const [climatePoint, setClimatePoint] = React.useState<ClimateLocation | null>(
+    initialShareState?.location.mode === "region" ? null : (initialShareState?.location ?? null),
+  )
+  const [climateHistoryYears, setClimateHistoryYears] = React.useState<ClimateHistoryYears>(
+    initialShareState?.historyYears ?? 1,
+  )
 
   const region = REGIONS.find((r) => r.name === regionName) ?? REGIONS[0]
   const climateLocation: ClimateLocation = climatePoint ?? {
@@ -27,6 +39,12 @@ export default function DashboardClient() {
     label: `the ${region.name} regional centroid`,
     latitude: region.lat,
     longitude: region.lon,
+  }
+  const shareState: DashboardShareState = {
+    regionName: region.name,
+    metric,
+    historyYears: climateHistoryYears,
+    location: climateLocation,
   }
 
   function selectRegion(name: string) {
@@ -168,6 +186,7 @@ export default function DashboardClient() {
               onLocationChange={setClimatePoint}
               historyYears={climateHistoryYears}
               onHistoryYearsChange={setClimateHistoryYears}
+              shareState={shareState}
             />
           </Grid>
 
