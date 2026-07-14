@@ -12,6 +12,7 @@ import {
   Link,
   Skeleton,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material"
 import CloudSyncOutlinedIcon from "@mui/icons-material/CloudSyncOutlined"
@@ -23,7 +24,6 @@ import type {
   EnvironmentalParameter,
   EnvironmentalSeries,
 } from "@/lib/domain/environment"
-import type { Region } from "@/lib/data"
 import { colors } from "@/lib/theme"
 
 interface PowerApiResponse {
@@ -73,12 +73,42 @@ type LoadState =
   | { key: string; status: "success"; response: PowerApiResponse }
   | { key: string; status: "error"; message: string }
 
-export default function ClimateObservations({ region }: { region: Region }) {
+export interface ClimateLocation {
+  mode: "region" | "point"
+  label: string
+  latitude: number
+  longitude: number
+}
+
+interface ClimateObservationsProps {
+  location: ClimateLocation
+  onLocationChange: (location: ClimateLocation | null) => void
+}
+
+export default function ClimateObservations({
+  location,
+  onLocationChange,
+}: ClimateObservationsProps) {
   const [attempt, setAttempt] = React.useState(0)
   const [loadState, setLoadState] = React.useState<LoadState | null>(null)
-  const requestUrl = `/api/climate/power?latitude=${region.lat}&longitude=${region.lon}`
-  const requestKey = `${region.name}:${attempt}`
+  const [draftLatitude, setDraftLatitude] = React.useState(String(location.latitude))
+  const [draftLongitude, setDraftLongitude] = React.useState(String(location.longitude))
+  const pointValidation = validatePoint(draftLatitude, draftLongitude)
+  const requestUrl = `/api/climate/power?latitude=${location.latitude}&longitude=${location.longitude}`
+  const requestKey = `${location.latitude}:${location.longitude}:${attempt}`
   const currentState = loadState?.key === requestKey ? loadState : null
+
+  function applyPoint(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!pointValidation.valid) return
+
+    onLocationChange({
+      mode: "point",
+      label: `Exact point ${pointValidation.latitude.toFixed(4)}, ${pointValidation.longitude.toFixed(4)}`,
+      latitude: pointValidation.latitude,
+      longitude: pointValidation.longitude,
+    })
+  }
 
   React.useEffect(() => {
     const controller = new AbortController()
@@ -123,15 +153,72 @@ export default function ClimateObservations({ region }: { region: Region }) {
             </Typography>
           </Stack>
           <Typography variant="body2" color="text.secondary">
-            Monthly climate observations for the {region.name} regional centroid.
+            Monthly climate observations for {location.label}.
           </Typography>
         </Box>
-        <Chip
-          label="Cached observed data"
-          size="small"
-          sx={{ bgcolor: colors.blueSoft, color: colors.blueDark, alignSelf: { xs: "flex-start" } }}
-        />
+        <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+          <Chip
+            label={location.mode === "region" ? "Regional centroid" : "Exact point"}
+            size="small"
+            variant="outlined"
+            sx={{ borderColor: colors.line, color: "text.secondary" }}
+          />
+          <Chip
+            label="Cached observed data"
+            size="small"
+            sx={{ bgcolor: colors.blueSoft, color: colors.blueDark }}
+          />
+        </Stack>
       </Stack>
+
+      <Box
+        component="form"
+        onSubmit={applyPoint}
+        sx={{ mt: 2.5, p: 2, border: `1px solid ${colors.line}`, bgcolor: "#0D1012" }}
+      >
+        <Typography variant="overline" color="text.secondary">
+          Exact climate point
+        </Typography>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          sx={{ mt: 1, alignItems: { sm: "flex-start" } }}
+        >
+          <TextField
+            label="Latitude"
+            value={draftLatitude}
+            onChange={(event) => setDraftLatitude(event.target.value)}
+            size="small"
+            type="number"
+            error={!pointValidation.valid && pointValidation.field === "latitude"}
+            slotProps={{ htmlInput: { step: "any", min: -90, max: 90 } }}
+            sx={{ width: { sm: 170 } }}
+          />
+          <TextField
+            label="Longitude"
+            value={draftLongitude}
+            onChange={(event) => setDraftLongitude(event.target.value)}
+            size="small"
+            type="number"
+            error={!pointValidation.valid && pointValidation.field === "longitude"}
+            slotProps={{ htmlInput: { step: "any", min: -180, max: 180 } }}
+            sx={{ width: { sm: 170 } }}
+          />
+          <Button type="submit" variant="contained" disabled={!pointValidation.valid}>
+            Apply point
+          </Button>
+          {location.mode === "point" && (
+            <Button type="button" variant="outlined" onClick={() => onLocationChange(null)}>
+              Use regional centroid
+            </Button>
+          )}
+        </Stack>
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+          {pointValidation.valid
+            ? "Enter coordinates for any exact point. Astroleet does not save this selection."
+            : pointValidation.message}
+        </Typography>
+      </Box>
 
       <Divider sx={{ my: 2.5 }} />
 
@@ -156,6 +243,38 @@ export default function ClimateObservations({ region }: { region: Region }) {
       )}
     </Card>
   )
+}
+
+type PointValidation =
+  | { valid: true; latitude: number; longitude: number }
+  | { valid: false; field: "latitude" | "longitude"; message: string }
+
+function validatePoint(latitudeInput: string, longitudeInput: string): PointValidation {
+  const latitude = Number(latitudeInput)
+  const longitude = Number(longitudeInput)
+
+  if (latitudeInput.trim() === "" || !Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
+    return {
+      valid: false,
+      field: "latitude",
+      message: "Latitude must be a number between −90 and 90.",
+    }
+  }
+
+  if (
+    longitudeInput.trim() === "" ||
+    !Number.isFinite(longitude) ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return {
+      valid: false,
+      field: "longitude",
+      message: "Longitude must be a number between −180 and 180.",
+    }
+  }
+
+  return { valid: true, latitude, longitude }
 }
 
 function ClimateLoading() {
