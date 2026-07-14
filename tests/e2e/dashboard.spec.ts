@@ -51,6 +51,11 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect(
     page.getByText(`60 monthly observations · ${historicalStartYear}–${latestCompleteYear}`),
   ).toBeVisible()
+  await expect(
+    page.getByRole("heading", { name: "Observed climate signals" }),
+  ).toBeVisible()
+  await expect(page.getByText("Warmer than seasonal baseline")).toBeVisible()
+  await expect(page.getByText("Deterministic screening")).toBeVisible()
   await page.getByRole("button", { name: "Precipitation" }).click()
   await expect(page.getByRole("button", { name: "Precipitation" })).toHaveAttribute(
     "aria-pressed",
@@ -58,6 +63,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   )
   await page.getByRole("combobox", { name: "History" }).selectOption("1")
   await expect(page.getByText("1-year history")).toBeVisible()
+  await expect(page.getByText("Longer history required")).toBeVisible()
   await page.getByLabel("Latitude").fill("91")
   await expect(page.getByRole("button", { name: "Apply point" })).toBeDisabled()
   await expect(page.getByText("Latitude must be a number between −90 and 90.")).toBeVisible()

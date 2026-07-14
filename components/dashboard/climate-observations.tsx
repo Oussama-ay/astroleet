@@ -37,6 +37,7 @@ import { colors } from "@/lib/theme"
 import ClimateHistory from "./climate-history"
 import DashboardShareActions from "./dashboard-share-actions"
 import ClimateExportActions from "./climate-export-actions"
+import ObservedClimateRecommendations from "./observed-climate-recommendations"
 
 interface PowerApiResponse {
   data: {
@@ -431,6 +432,8 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
       </Grid>
 
       <ClimateHistory series={response.data.series} />
+
+      <ObservedClimateRecommendations series={response.data.series} />
 
       {provenance && (
         <>
