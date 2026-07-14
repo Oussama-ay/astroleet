@@ -36,6 +36,7 @@ import type {
 import { colors } from "@/lib/theme"
 import ClimateHistory from "./climate-history"
 import DashboardShareActions from "./dashboard-share-actions"
+import ClimateExportActions from "./climate-export-actions"
 
 interface PowerApiResponse {
   data: {
@@ -458,15 +459,18 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
                 Retrieved and normalized {formatProcessedAt(provenance.processedAt)}
               </Typography>
             </Box>
-            <Link
-              href={provenance.source.documentation}
-              target="_blank"
-              rel="noreferrer"
-              underline="hover"
-              sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, fontSize: 13 }}
-            >
-              NASA POWER documentation <OpenInNewIcon sx={{ fontSize: 14 }} />
-            </Link>
+            <Stack spacing={1} sx={{ alignItems: { md: "flex-end" } }}>
+              <ClimateExportActions series={response.data.series} />
+              <Link
+                href={provenance.source.documentation}
+                target="_blank"
+                rel="noreferrer"
+                underline="hover"
+                sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, fontSize: 13 }}
+              >
+                NASA POWER documentation <OpenInNewIcon sx={{ fontSize: 14 }} />
+              </Link>
+            </Stack>
           </Stack>
         </>
       )}
