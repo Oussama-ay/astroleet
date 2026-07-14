@@ -63,6 +63,10 @@ For deployed environments, add the same variables through the hosting provider's
 environment settings. Use separate OpenAI projects for preview and production when possible, and
 configure spend notifications and project limits in the OpenAI dashboard.
 
+The AI route includes privacy-safe request logs, request IDs, and a best-effort per-instance burst
+limit. See [the operations guide](docs/operations.md) for health checks, configuration, telemetry,
+and the boundary before durable saved-location monitoring.
+
 If port `3000` is already in use, Next.js may ask to use another port. Accept it, then open the URL printed in the terminal.
 
 ## Production build

@@ -33,7 +33,14 @@ export interface AIClimateContext {
 
 export class AIClimateExplanationError extends Error {
   constructor(
-    readonly code: "not_configured" | "provider_unavailable" | "invalid_output",
+    readonly code:
+      | "not_configured"
+      | "quota_exceeded"
+      | "rate_limited"
+      | "authentication_failed"
+      | "timeout"
+      | "provider_unavailable"
+      | "invalid_output",
     message: string,
   ) {
     super(message)
@@ -121,11 +128,45 @@ export async function generateAIClimateExplanation(
     return { explanation, model }
   } catch (error) {
     if (error instanceof AIClimateExplanationError) throw error
-    throw new AIClimateExplanationError(
-      "provider_unavailable",
-      "The AI explanation service is temporarily unavailable",
+    throw classifyAIProviderError(error)
+  }
+}
+
+export function classifyAIProviderError(error: unknown) {
+  if (error instanceof OpenAI.APIConnectionTimeoutError) {
+    return new AIClimateExplanationError(
+      "timeout",
+      "The AI explanation service timed out",
     )
   }
+
+  if (
+    error instanceof OpenAI.AuthenticationError ||
+    error instanceof OpenAI.PermissionDeniedError
+  ) {
+    return new AIClimateExplanationError(
+      "authentication_failed",
+      "The AI provider rejected this deployment's configuration",
+    )
+  }
+
+  if (error instanceof OpenAI.RateLimitError) {
+    if (error.code === "insufficient_quota") {
+      return new AIClimateExplanationError(
+        "quota_exceeded",
+        "The AI provider quota is exhausted",
+      )
+    }
+    return new AIClimateExplanationError(
+      "rate_limited",
+      "The AI provider is temporarily rate limited",
+    )
+  }
+
+  return new AIClimateExplanationError(
+    "provider_unavailable",
+    "The AI explanation service is temporarily unavailable",
+  )
 }
 
 function verifySignalGrounding(

@@ -35,6 +35,14 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
     })
   })
 
+  const healthResponse = await page.request.get("/api/health")
+  expect(healthResponse.ok()).toBe(true)
+  expect(healthResponse.headers()["x-request-id"]).toBeTruthy()
+  await expect(healthResponse.json()).resolves.toMatchObject({
+    status: "ok",
+    services: { nasaPower: "route_available" },
+  })
+
   await page.goto("/dashboard")
 
   await expect(
@@ -308,5 +316,6 @@ const aiExplanationResponse = {
     provider: "OpenAI",
     model: "gpt-5.6-luna",
     generatedAt: "2026-07-14T16:00:00.000Z",
+    requestId: "ad2fb018-43df-4b1d-892e-560cd6614c1d",
   },
 }
