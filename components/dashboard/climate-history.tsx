@@ -8,6 +8,7 @@ import type {
   EnvironmentalSeries,
 } from "@/lib/domain/environment"
 import { colors } from "@/lib/theme"
+import DataStatusBadge from "@/components/data-status-badge"
 
 type ClimateParameter = Extract<
   EnvironmentalParameter,
@@ -52,9 +53,12 @@ export default function ClimateHistory({ series }: { series: EnvironmentalSeries
         sx={{ justifyContent: "space-between", alignItems: { md: "flex-start" } }}
       >
         <Box>
-          <Typography variant="overline" color="text.secondary">
-            Historical comparison
-          </Typography>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 0.5 }}>
+            <Typography variant="overline" color="text.secondary">
+              Historical comparison
+            </Typography>
+            <DataStatusBadge status="observed" />
+          </Stack>
           <Typography component="h3" variant="h5" sx={{ mt: 0.25 }}>
             Monthly record
           </Typography>

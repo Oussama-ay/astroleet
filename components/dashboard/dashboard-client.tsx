@@ -15,6 +15,14 @@ import ClimateObservations, { type ClimateLocation } from "./climate-observation
 import type { ClimateHistoryYears } from "@/lib/domain/climate-history"
 import type { DashboardShareState } from "@/lib/domain/dashboard-share"
 import { regionForMoroccoPoint } from "@/lib/domain/morocco-geography"
+import DataStatusBadge from "@/components/data-status-badge"
+
+const DASHBOARD_SECTIONS = [
+  { index: "01", label: "Position & layer", href: "#position-layer" },
+  { index: "02", label: "Geographic canvas", href: "#geographic-canvas" },
+  { index: "03", label: "Observed evidence", href: "#observed-evidence" },
+  { index: "04", label: "Experimental layers", href: "#experimental-layers" },
+]
 
 export default function DashboardClient({
   initialShareState,
@@ -189,6 +197,51 @@ export default function DashboardClient({
         />
       </Box>
       <Container maxWidth="xl" sx={{ position: "relative", zIndex: 1, py: { xs: 3, md: 4 } }}>
+        <Box
+          component="nav"
+          aria-label="Dashboard sections"
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 20,
+            mb: { xs: 3, md: 4 },
+            mx: { xs: -2, sm: 0 },
+            px: { xs: 2, sm: 0 },
+            overflowX: "auto",
+            bgcolor: "rgba(5,6,7,0.94)",
+            borderTop: `1px solid ${colors.line}`,
+            borderBottom: `1px solid ${colors.line}`,
+            backdropFilter: "blur(14px)",
+          }}
+        >
+          <Stack direction="row" sx={{ minWidth: "max-content" }}>
+            {DASHBOARD_SECTIONS.map((item) => (
+              <Box
+                key={item.index}
+                component="a"
+                href={item.href}
+                sx={{
+                  display: "flex",
+                  gap: 1,
+                  alignItems: "center",
+                  px: { xs: 1.5, md: 2.25 },
+                  py: 1.5,
+                  color: "text.secondary",
+                  textDecoration: "none",
+                  borderRight: `1px solid ${colors.line}`,
+                  "&:hover, &:focus-visible": { color: colors.white, bgcolor: "rgba(255,255,255,0.04)" },
+                }}
+              >
+                <Typography variant="overline" sx={{ color: colors.blue, fontFamily: "var(--font-mono)" }}>
+                  {item.index}
+                </Typography>
+                <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                  {item.label}
+                </Typography>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
         <Grid container spacing={{ xs: 3, md: 4 }}>
           <Grid size={12}>
             <Box
@@ -198,9 +251,11 @@ export default function DashboardClient({
             >
               <Grid container>
                 <Grid
+                  id="position-layer"
                   size={{ xs: 12, md: 3 }}
                   sx={{
                     p: { xs: 2, md: 3 },
+                    scrollMarginTop: 76,
                     borderRight: { md: `1px solid ${colors.line}` },
                     borderBottom: { xs: `1px solid ${colors.line}`, md: 0 },
                   }}
@@ -215,7 +270,11 @@ export default function DashboardClient({
               />
                   </Box>
                 </Grid>
-                <Grid size={{ xs: 12, md: 9 }} sx={{ p: { xs: 2, md: 3 } }}>
+                <Grid
+                  id="geographic-canvas"
+                  size={{ xs: 12, md: 9 }}
+                  sx={{ p: { xs: 2, md: 3 }, scrollMarginTop: 76 }}
+                >
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
                     spacing={1}
@@ -231,9 +290,12 @@ export default function DashboardClient({
                         Morocco map explorer
                       </Typography>
                     </Box>
-                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                      Region polygons · exact points · sampled radius
-                    </Typography>
+                    <Stack spacing={0.75} sx={{ alignItems: { sm: "flex-end" } }}>
+                      <DataStatusBadge status="synthetic" label="Synthetic map layer" />
+                      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                        Region polygons · exact points · sampled radius
+                      </Typography>
+                    </Stack>
                   </Stack>
               <MoroccoMap
                 metric={metric}
@@ -248,17 +310,19 @@ export default function DashboardClient({
           </Grid>
 
           <Grid size={12}>
-            <ClimateObservations
-              key={`${climateLocation.mode}:${climateLocation.latitude}:${climateLocation.longitude}:${climateLocation.mode === "radius" ? climateLocation.radiusKm : "point"}`}
-              location={climateLocation}
-              onLocationChange={setClimateLocation}
-              historyYears={climateHistoryYears}
-              onHistoryYearsChange={setClimateHistoryYears}
-              shareState={shareState}
-            />
+            <Box id="observed-evidence" sx={{ scrollMarginTop: 76 }}>
+              <ClimateObservations
+                key={`${climateLocation.mode}:${climateLocation.latitude}:${climateLocation.longitude}:${climateLocation.mode === "radius" ? climateLocation.radiusKm : "point"}`}
+                location={climateLocation}
+                onLocationChange={setClimateLocation}
+                historyYears={climateHistoryYears}
+                onHistoryYearsChange={setClimateHistoryYears}
+                shareState={shareState}
+              />
+            </Box>
           </Grid>
 
-          <Grid size={12} sx={{ mt: { md: 1 } }}>
+          <Grid id="experimental-layers" size={12} sx={{ mt: { md: 1 }, scrollMarginTop: 76 }}>
             <Stack
               direction={{ xs: "column", sm: "row" }}
               spacing={1.5}
@@ -273,9 +337,7 @@ export default function DashboardClient({
                   Synthetic regional values for interface exploration—not live observations.
                 </Typography>
               </Box>
-              <Typography variant="overline" sx={{ color: colors.amber }}>
-                Demonstration / non-operational
-              </Typography>
+              <DataStatusBadge status="synthetic" label="Demo / non-operational" />
             </Stack>
           </Grid>
 
@@ -284,7 +346,14 @@ export default function DashboardClient({
           </Grid>
 
           <Grid size={12}>
-            <Box sx={{ border: `1px solid ${colors.line}`, bgcolor: "rgba(7,9,10,0.94)" }}>
+            <Box
+              sx={{
+                border: "1px dashed rgba(231,168,75,0.52)",
+                bgcolor: "rgba(28,22,13,0.76)",
+                backgroundImage:
+                  "repeating-linear-gradient(135deg, transparent 0, transparent 16px, rgba(231,168,75,0.018) 16px, rgba(231,168,75,0.018) 32px)",
+              }}
+            >
               <Grid container>
                 <Grid
                   size={{ xs: 12, md: 7 }}

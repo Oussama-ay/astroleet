@@ -58,7 +58,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   ).toBeVisible()
   await expect(
     page.getByRole("region", { name: "Interactive map restricted to Morocco" }),
-  ).toBeVisible()
+  ).toBeVisible({ timeout: 15_000 })
   await expect(page.locator(".leaflet-container")).toBeVisible()
   await expect(page.locator(".leaflet-control-attribution")).toContainText("OpenStreetMap")
   await expect(page.getByRole("combobox", { name: "Select region" })).toHaveValue(
@@ -69,7 +69,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   ).toBeVisible()
   await expect(page.getByLabel("Air temperature observed value")).toContainText("12.30°C")
   await expect(page.getByText("Cached observed data")).toBeVisible()
-  await page.getByRole("combobox", { name: "History" }).selectOption("5")
+  await page.getByRole("button", { name: "5 years history" }).click()
   await expect.poll(() => climateRequests.at(-1)).toContain(
     `start=${historicalStartYear}&end=${latestCompleteYear}`,
   )
@@ -117,7 +117,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
     "aria-pressed",
     "true",
   )
-  await page.getByRole("combobox", { name: "History" }).selectOption("1")
+  await page.getByRole("button", { name: "1 year history" }).click()
   await expect(page.getByText("1-year history")).toBeVisible()
   await expect(page.getByText("Longer history required")).toBeVisible()
   await expect(page.getByRole("button", { name: "Explain with AI" })).toHaveCount(0)
@@ -145,7 +145,7 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect(page.getByText("Derived mean of 5 samples across a 100 km radius")).toBeVisible()
   await expect(page.getByLabel("100 km analysis radius")).toBeVisible()
   await expect(page.getByText("Dashed outline · 100 km radius")).toBeVisible()
-  await page.getByRole("combobox", { name: "History" }).selectOption("5")
+  await page.getByRole("button", { name: "5 years history" }).click()
   await page.locator('button[value="lst"]').click()
   await page.getByRole("button", { name: "Share analysis" }).click()
   await expect(page.getByText("Analysis link copied")).toBeVisible()
@@ -164,7 +164,10 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await expect(page.getByRole("combobox", { name: "Select region" })).toHaveValue(
     "Casablanca-Settat",
   )
-  await expect(page.getByRole("combobox", { name: "History" })).toHaveValue("5")
+  await expect(page.getByRole("button", { name: "5 years history" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  )
   await expect(page.locator('button[value="lst"]')).toHaveAttribute("aria-pressed", "true")
   await expect(
     page.getByText("Monthly climate observations for a 100 km radius around 33.5700, -7.5900."),

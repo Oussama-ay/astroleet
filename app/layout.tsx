@@ -25,7 +25,6 @@ export const metadata: Metadata = {
   },
   description:
     'Astroleet turns satellite Earth observation into trustworthy, evidence-based environmental intelligence for Morocco: vegetation, soil moisture and land surface temperature.',
-  generator: 'v0.app',
 }
 
 export const viewport: Viewport = {

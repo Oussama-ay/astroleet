@@ -10,6 +10,8 @@ import {
   Skeleton,
   Stack,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material"
 import OpenInNewIcon from "@mui/icons-material/OpenInNew"
@@ -40,6 +42,7 @@ import DashboardShareActions from "./dashboard-share-actions"
 import ClimateExportActions from "./climate-export-actions"
 import ObservedClimateRecommendations from "./observed-climate-recommendations"
 import AIClimateExplanation from "./ai-climate-explanation"
+import DataStatusBadge from "@/components/data-status-badge"
 
 interface PowerApiResponse {
   data: {
@@ -194,7 +197,7 @@ export default function ClimateObservations({
         }}
       >
         <Box>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
             <Typography variant="overline" sx={{ color: colors.blue, fontFamily: "var(--font-mono)" }}>
               03
             </Typography>
@@ -202,6 +205,7 @@ export default function ClimateObservations({
             <Typography variant="overline" color="text.secondary">
               Observed evidence
             </Typography>
+            <DataStatusBadge status="observed" />
           </Stack>
           <Typography id="observed-climate-title" component="h2" variant="h4" sx={{ mt: 0.75 }}>
             Climate record
@@ -237,132 +241,177 @@ export default function ClimateObservations({
         </Stack>
       </Stack>
 
-      <Box
-        component="form"
-        onSubmit={applyPoint}
-        sx={{
-          px: { xs: 2, md: 3 },
-          py: 2,
-          borderBottom: `1px solid ${colors.line}`,
-          bgcolor: "rgba(255,255,255,0.018)",
-        }}
-      >
-        <Typography variant="overline" sx={{ color: colors.white }}>
-          Analysis geometry
-        </Typography>
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={1.5}
-          sx={{ mt: 1, alignItems: { sm: "flex-start" } }}
+      <Grid container sx={{ borderBottom: `1px solid ${colors.line}` }}>
+        <Grid
+          size={{ xs: 12, lg: 4 }}
+          sx={{
+            borderRight: { lg: `1px solid ${colors.line}` },
+            borderBottom: { xs: `1px solid ${colors.line}`, lg: 0 },
+            bgcolor: "rgba(255,255,255,0.018)",
+          }}
         >
-          <TextField
-            label="Latitude"
-            value={draftLatitude}
-            onChange={(event) => setDraftLatitude(event.target.value)}
-            size="small"
-            type="number"
-            error={!pointValidation.valid && pointValidation.field === "latitude"}
-            slotProps={{
-              htmlInput: {
-                step: "any",
-                min: MOROCCO_GEOGRAPHIC_BOUNDS.south,
-                max: MOROCCO_GEOGRAPHIC_BOUNDS.north,
-              },
-            }}
-            sx={{ width: { sm: 170 } }}
-          />
-          <TextField
-            label="Longitude"
-            value={draftLongitude}
-            onChange={(event) => setDraftLongitude(event.target.value)}
-            size="small"
-            type="number"
-            error={!pointValidation.valid && pointValidation.field === "longitude"}
-            slotProps={{
-              htmlInput: {
-                step: "any",
-                min: MOROCCO_GEOGRAPHIC_BOUNDS.west,
-                max: MOROCCO_GEOGRAPHIC_BOUNDS.east,
-              },
-            }}
-            sx={{ width: { sm: 170 } }}
-          />
-          <TextField
-            select
-            label="Radius"
-            value={draftRadius}
-            onChange={(event) => setDraftRadius(Number(event.target.value) as 50 | 100 | 200)}
-            size="small"
-            slotProps={{ select: { native: true } }}
-            sx={{ width: { sm: 130 } }}
+          <Box
+            component="form"
+            onSubmit={applyPoint}
+            sx={{ p: { xs: 2, md: 3 }, height: "100%" }}
           >
-            <option value={50}>50 km</option>
-            <option value={100}>100 km</option>
-            <option value={200}>200 km</option>
-          </TextField>
-          <TextField
-            select
-            label="History"
-            value={historyYears}
-            onChange={(event) =>
-              onHistoryYearsChange(Number(event.target.value) as ClimateHistoryYears)
-            }
-            size="small"
-            slotProps={{ select: { native: true } }}
-            sx={{ width: { sm: 130 } }}
-          >
-            {CLIMATE_HISTORY_YEAR_OPTIONS.map((years) => (
-              <option key={years} value={years}>
-                {years} {years === 1 ? "year" : "years"}
-              </option>
-            ))}
-          </TextField>
-          <Button type="submit" variant="contained" disabled={!pointValidation.valid}>
-            Apply point
-          </Button>
-          <Button
-            type="button"
-            variant="outlined"
-            disabled={!pointValidation.valid}
-            onClick={applyRadius}
-          >
-            Analyze radius
-          </Button>
-          {location.mode !== "region" && (
-            <Button type="button" variant="outlined" onClick={() => onLocationChange(null)}>
-              Use regional centroid
-            </Button>
+            <Typography variant="overline" sx={{ color: colors.white }}>
+              Inputs / analysis geometry
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 2.5 }}>
+              Define a point, radius and comparison window.
+            </Typography>
+
+            <Grid container spacing={1.5}>
+              <Grid size={{ xs: 12, sm: 6, lg: 12, xl: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Latitude"
+                  value={draftLatitude}
+                  onChange={(event) => setDraftLatitude(event.target.value)}
+                  size="small"
+                  type="number"
+                  error={!pointValidation.valid && pointValidation.field === "latitude"}
+                  slotProps={{
+                    htmlInput: {
+                      step: "any",
+                      min: MOROCCO_GEOGRAPHIC_BOUNDS.south,
+                      max: MOROCCO_GEOGRAPHIC_BOUNDS.north,
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, lg: 12, xl: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Longitude"
+                  value={draftLongitude}
+                  onChange={(event) => setDraftLongitude(event.target.value)}
+                  size="small"
+                  type="number"
+                  error={!pointValidation.valid && pointValidation.field === "longitude"}
+                  slotProps={{
+                    htmlInput: {
+                      step: "any",
+                      min: MOROCCO_GEOGRAPHIC_BOUNDS.west,
+                      max: MOROCCO_GEOGRAPHIC_BOUNDS.east,
+                    },
+                  }}
+                />
+              </Grid>
+            </Grid>
+
+            <Typography variant="overline" sx={{ display: "block", mt: 2.5, mb: 0.75, color: "text.secondary" }}>
+              Radius
+            </Typography>
+            <ToggleButtonGroup
+              exclusive
+              fullWidth
+              size="small"
+              value={draftRadius}
+              aria-label="Radius"
+              onChange={(_, value) => value && setDraftRadius(value as 50 | 100 | 200)}
+              sx={segmentedControlStyles}
+            >
+              {[50, 100, 200].map((radius) => (
+                <ToggleButton key={radius} value={radius} aria-label={`${radius} km radius`}>
+                  {radius} km
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+
+            <Typography variant="overline" sx={{ display: "block", mt: 2, mb: 0.75, color: "text.secondary" }}>
+              History
+            </Typography>
+            <ToggleButtonGroup
+              exclusive
+              fullWidth
+              size="small"
+              value={historyYears}
+              aria-label="History"
+              onChange={(_, value) =>
+                value && onHistoryYearsChange(value as ClimateHistoryYears)
+              }
+              sx={segmentedControlStyles}
+            >
+              {CLIMATE_HISTORY_YEAR_OPTIONS.map((years) => (
+                <ToggleButton key={years} value={years} aria-label={`${years} ${years === 1 ? "year" : "years"} history`}>
+                  {years}y
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+
+            <Stack spacing={1} sx={{ mt: 2.5 }}>
+              <Button type="submit" fullWidth variant="contained" disabled={!pointValidation.valid}>
+                Apply point
+              </Button>
+              <Button
+                type="button"
+                fullWidth
+                variant="outlined"
+                aria-label="Analyze radius"
+                disabled={!pointValidation.valid}
+                onClick={applyRadius}
+              >
+                Analyze {draftRadius} km radius
+              </Button>
+              {location.mode !== "region" && (
+                <Button type="button" fullWidth variant="text" onClick={() => onLocationChange(null)}>
+                  Use regional centroid
+                </Button>
+              )}
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1.5, lineHeight: 1.5 }}>
+              {pointValidation.valid
+                ? "Radius analysis averages the center and four boundary samples. It is an estimate, not a complete area scan."
+                : pointValidation.message}
+            </Typography>
+          </Box>
+        </Grid>
+
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <Box sx={{ px: { xs: 2, md: 3 }, pt: { xs: 2, md: 3 } }}>
+            <Stack direction="row" spacing={1} sx={{ justifyContent: "space-between", alignItems: "center" }}>
+              <Box>
+                <Typography variant="overline" sx={{ color: colors.white }}>
+                  Outputs / latest month
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  NASA POWER normalized monthly observations
+                </Typography>
+              </Box>
+              <DataStatusBadge status="observed" />
+            </Stack>
+          </Box>
+
+          {!currentState && (
+            <Box sx={{ p: { xs: 2, md: 3 } }}>
+              <ClimateLoading />
+            </Box>
           )}
-        </Stack>
-        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-          {pointValidation.valid
-            ? "Radius analysis averages the center and four boundary samples. The 50 km minimum respects POWER's native meteorological grid; it is an estimate, not a complete area scan."
-            : pointValidation.message}
-        </Typography>
-      </Box>
 
-      {!currentState && (
-        <Box sx={{ p: { xs: 2, md: 3 } }}>
-          <ClimateLoading />
-        </Box>
-      )}
+          {currentState?.status === "error" && (
+            <Alert
+              severity="warning"
+              action={
+                <Button color="inherit" size="small" onClick={() => setAttempt((value) => value + 1)}>
+                  Retry
+                </Button>
+              }
+              sx={{ m: { xs: 2, md: 3 }, bgcolor: "#211B12", color: "text.primary" }}
+            >
+              {currentState.message}. The demonstration indicators remain available below.
+            </Alert>
+          )}
 
-      {currentState?.status === "error" && (
-        <Alert
-          severity="warning"
-          action={
-            <Button color="inherit" size="small" onClick={() => setAttempt((value) => value + 1)}>
-              Retry
-            </Button>
-          }
-          sx={{ m: { xs: 2, md: 3 }, bgcolor: "#211B12", color: "text.primary" }}
-        >
-          {currentState.message}. The demonstration indicators remain available below.
-        </Alert>
-      )}
+          {currentState?.status === "success" && (
+            <ClimateMetricCards response={currentState.response} />
+          )}
+        </Grid>
+      </Grid>
 
       {currentState?.status === "success" && (
-        <ClimateResults response={currentState.response} />
+        <ClimateResultDetails response={currentState.response} />
       )}
     </Box>
   )
@@ -424,65 +473,72 @@ function ClimateLoading() {
   )
 }
 
-function ClimateResults({ response }: { response: PowerApiResponse }) {
+function ClimateMetricCards({ response }: { response: PowerApiResponse }) {
+  return (
+    <Grid container spacing={0} sx={{ mt: 1.5 }}>
+      {CLIMATE_CARDS.map((card) => {
+        const series = response.data.series.find(
+          (candidate) => candidate.parameter === card.parameter,
+        )
+        const latest = series?.values.findLast((entry) => entry.value !== null)
+
+        return (
+          <Grid
+            key={card.parameter}
+            size={{ xs: 12, sm: 4 }}
+            sx={{
+              borderRight: { sm: `1px solid ${colors.line}` },
+              borderTop: `1px solid ${colors.line}`,
+              "&:last-of-type": { borderRight: 0 },
+            }}
+          >
+            <Box
+              aria-label={`${card.label} observed value`}
+              sx={{
+                position: "relative",
+                height: "100%",
+                minHeight: 164,
+                px: { xs: 2, md: 2.5 },
+                py: 2.25,
+                overflow: "hidden",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  inset: "auto 24px 0 24px",
+                  height: 2,
+                  bgcolor: card.accent,
+                },
+              }}
+            >
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: card.accent }}>
+                {card.icon}
+                <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+                  {card.label}
+                </Typography>
+              </Stack>
+              <Typography variant="h4" sx={{ mt: 1.25, fontFamily: "var(--font-mono)" }}>
+                {latest && series ? formatClimateValue(latest.value, series.unit) : "Unavailable"}
+              </Typography>
+              <Stack direction="row" spacing={1} sx={{ mt: 0.75, justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
+                <Typography variant="caption" color="text.secondary">
+                  {latest ? `${formatObservationMonth(latest.observedAt)} monthly average` : "No valid observation"}
+                </Typography>
+                <DataStatusBadge status="observed" />
+              </Stack>
+            </Box>
+          </Grid>
+        )
+      })}
+    </Grid>
+  )
+}
+
+function ClimateResultDetails({ response }: { response: PowerApiResponse }) {
   const provenance = response.data.series[0]
   const assessment = assessObservedClimate(response.data.series)
 
   return (
     <>
-      <Grid container spacing={0} sx={{ borderBottom: `1px solid ${colors.line}` }}>
-        {CLIMATE_CARDS.map((card) => {
-          const series = response.data.series.find(
-            (candidate) => candidate.parameter === card.parameter,
-          )
-          const latest = series?.values.findLast((entry) => entry.value !== null)
-
-          return (
-            <Grid
-              key={card.parameter}
-              size={{ xs: 12, sm: 4 }}
-              sx={{
-                borderRight: { sm: `1px solid ${colors.line}` },
-                borderBottom: { xs: `1px solid ${colors.line}`, sm: 0 },
-                "&:last-of-type": { borderRight: 0, borderBottom: 0 },
-              }}
-            >
-              <Box
-                aria-label={`${card.label} observed value`}
-                sx={{
-                  position: "relative",
-                  height: "100%",
-                  minHeight: 132,
-                  px: { xs: 2, md: 3 },
-                  py: 2.25,
-                  overflow: "hidden",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    inset: "auto 24px 0 24px",
-                    height: 2,
-                    bgcolor: card.accent,
-                  },
-                }}
-              >
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: card.accent }}>
-                  {card.icon}
-                  <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
-                    {card.label}
-                  </Typography>
-                </Stack>
-                <Typography variant="h4" sx={{ mt: 1.25, fontFamily: "var(--font-mono)" }}>
-                  {latest && series ? formatClimateValue(latest.value, series.unit) : "Unavailable"}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {latest ? `${formatObservationMonth(latest.observedAt)} monthly average` : "No valid observation"}
-                </Typography>
-              </Box>
-            </Grid>
-          )
-        })}
-      </Grid>
-
       <Grid container>
         <Grid
           size={{ xs: 12, lg: 7 }}
@@ -568,6 +624,20 @@ function ObservationMeta({ label, value }: { label: string; value: string }) {
       </Typography>
     </Box>
   )
+}
+
+const segmentedControlStyles = {
+  border: `1px solid ${colors.line}`,
+  "& .MuiToggleButton-root": {
+    border: 0,
+    color: "text.secondary",
+    "&.Mui-selected": {
+      color: colors.white,
+      bgcolor: "rgba(85,167,232,0.18)",
+      boxShadow: `inset 0 -2px 0 ${colors.blue}`,
+    },
+    "&.Mui-selected:hover": { bgcolor: "rgba(85,167,232,0.24)" },
+  },
 }
 
 function formatClimateValue(value: number | null, unit: string) {

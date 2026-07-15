@@ -56,6 +56,19 @@ export default function MoroccoMap({
           size="small"
           aria-label="Map selection mode"
           onChange={(_, value) => value && setSelectionMode(value)}
+          sx={{
+            border: `1px solid ${colors.line}`,
+            "& .MuiToggleButton-root": {
+              border: 0,
+              color: "text.secondary",
+              "&.Mui-selected": {
+                color: colors.white,
+                bgcolor: "rgba(85,167,232,0.18)",
+                boxShadow: `inset 0 -2px 0 ${colors.blue}`,
+              },
+              "&.Mui-selected:hover": { bgcolor: "rgba(85,167,232,0.24)" },
+            },
+          }}
         >
           <ToggleButton value="region">Region select</ToggleButton>
           <ToggleButton value="point">Point select</ToggleButton>

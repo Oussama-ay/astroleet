@@ -16,6 +16,7 @@ import {
 } from "@/lib/data"
 import { colorFor } from "@/lib/scale"
 import { colors } from "@/lib/theme"
+import DataStatusBadge from "@/components/data-status-badge"
 
 const ICONS: Record<MetricKey, React.ReactNode> = {
   ndvi: <GrassIcon />,
@@ -34,7 +35,16 @@ export default function MetricCards({ region, active, onSelect }: Props) {
   const order: MetricKey[] = ["ndvi", "moisture", "lst"]
 
   return (
-    <Grid container spacing={0} sx={{ border: `1px solid ${colors.line}`, bgcolor: "rgba(7,9,10,0.94)" }}>
+    <Grid
+      container
+      spacing={0}
+      sx={{
+        border: "1px dashed rgba(231,168,75,0.52)",
+        bgcolor: "rgba(28,22,13,0.76)",
+        backgroundImage:
+          "repeating-linear-gradient(135deg, transparent 0, transparent 16px, rgba(231,168,75,0.018) 16px, rgba(231,168,75,0.018) 32px)",
+      }}
+    >
       {order.map((key) => {
         const def = METRICS[key]
         const value = values[key]
@@ -66,7 +76,7 @@ export default function MetricCards({ region, active, onSelect }: Props) {
                 textAlign: "left",
                 position: "relative",
                 overflow: "hidden",
-                bgcolor: isActive ? "rgba(85,167,232,0.07)" : "transparent",
+                bgcolor: isActive ? "rgba(231,168,75,0.09)" : "transparent",
               }}
             >
                 <Box
@@ -92,20 +102,23 @@ export default function MetricCards({ region, active, onSelect }: Props) {
                   >
                     {ICONS[key]}
                   </Box>
-                  <Stack
-                    direction="row"
-                    spacing={0.5}
-                    sx={{ alignItems: "center", color: positive ? colors.greenDark : "#F0B36D" }}
-                  >
-                    {delta >= 0 ? (
-                      <TrendingUpIcon sx={{ fontSize: 15 }} />
-                    ) : (
-                      <TrendingDownIcon sx={{ fontSize: 15 }} />
-                    )}
-                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                      {delta >= 0 ? "+" : ""}
-                      {key === "ndvi" ? delta.toFixed(2) : delta.toFixed(1)}
-                    </Typography>
+                  <Stack spacing={1} sx={{ alignItems: "flex-end" }}>
+                    <DataStatusBadge status="synthetic" />
+                    <Stack
+                      direction="row"
+                      spacing={0.5}
+                      sx={{ alignItems: "center", color: positive ? colors.greenDark : "#F0B36D" }}
+                    >
+                      {delta >= 0 ? (
+                        <TrendingUpIcon sx={{ fontSize: 15 }} />
+                      ) : (
+                        <TrendingDownIcon sx={{ fontSize: 15 }} />
+                      )}
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                        {delta >= 0 ? "+" : ""}
+                        {key === "ndvi" ? delta.toFixed(2) : delta.toFixed(1)}
+                      </Typography>
+                    </Stack>
                   </Stack>
                 </Stack>
 

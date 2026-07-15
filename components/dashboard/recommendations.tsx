@@ -7,6 +7,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined"
 import { recommendationsForRegion, type Region, type Recommendation } from "@/lib/data"
 import { colors } from "@/lib/theme"
+import DataStatusBadge from "@/components/data-status-badge"
 
 const STYLE: Record<
   Recommendation["severity"],
@@ -22,9 +23,12 @@ export default function Recommendations({ region }: { region: Region }) {
 
   return (
     <Box>
-      <Typography variant="overline" color="text.secondary">
-        Synthetic guidance
-      </Typography>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+        <Typography variant="overline" color="text.secondary">
+          Synthetic guidance
+        </Typography>
+        <DataStatusBadge status="synthetic" />
+      </Stack>
       <Stack direction="row" spacing={1.25} sx={{ mt: 0.25, mb: 0.5, alignItems: "center" }}>
         <ScienceOutlinedIcon sx={{ color: colors.amber }} />
         <Typography variant="h6">Model recommendations</Typography>

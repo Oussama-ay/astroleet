@@ -23,6 +23,7 @@ import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined"
 import BackgroundVideo from "@/components/background-video"
 import PageShell from "@/components/page-shell"
 import { colors } from "@/lib/theme"
+import DataStatusBadge from "@/components/data-status-badge"
 
 const PIPELINE = [
   {
@@ -234,22 +235,74 @@ export default function MethodologyClient() {
 
         {/* Pipeline */}
         <SectionHeading icon={<RuleIcon />} overline="Processing" title="From raw radiance to regional indicators" />
-        <Grid container spacing={3} sx={{ mb: 8 }}>
-          {PIPELINE.map((p) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={p.step}>
-              <Box sx={{ height: "100%", p: 2.5, borderRadius: 0, border: `1px solid ${colors.line}`, bgcolor: "#090B0C" }}>
-                <Typography
-                  variant="h5"
-                  sx={{ fontFamily: "var(--font-mono)", color: "primary.main", fontWeight: 700 }}
+        <Grid
+          container
+          spacing={{ xs: 2, md: 3 }}
+          sx={{
+            mb: 8,
+            position: "relative",
+            "&::before": {
+              content: '""',
+              display: { xs: "none", md: "block" },
+              position: "absolute",
+              top: 31,
+              left: "12.5%",
+              right: "12.5%",
+              height: 1,
+              bgcolor: colors.blue,
+              opacity: 0.45,
+            },
+          }}
+        >
+          {PIPELINE.map((p, index) => (
+            <Grid size={{ xs: 12, md: 3 }} key={p.step}>
+              <Box sx={{ position: "relative", height: "100%", pl: { xs: 9.5, md: 0 } }}>
+                <Box
+                  sx={{
+                    position: { xs: "absolute", md: "relative" },
+                    left: { xs: 0, md: "auto" },
+                    top: 0,
+                    zIndex: 1,
+                    width: 62,
+                    height: 62,
+                    display: "grid",
+                    placeItems: "center",
+                    bgcolor: "#090B0C",
+                    border: `1px solid ${colors.blue}`,
+                    fontFamily: "var(--font-mono)",
+                    color: colors.blueDark,
+                    fontWeight: 700,
+                  }}
                 >
                   {p.step}
-                </Typography>
-                <Typography variant="subtitle1" sx={{ mt: 1, fontWeight: 700 }}>
-                  {p.title}
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 0.5, color: "text.secondary", lineHeight: 1.55 }}>
-                  {p.text}
-                </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    height: "100%",
+                    mt: { md: 2 },
+                    p: { xs: 2, md: 2.5 },
+                    border: `1px solid ${colors.line}`,
+                    bgcolor: "#090B0C",
+                    "&::before": {
+                      content: '""',
+                      display: { xs: index === PIPELINE.length - 1 ? "none" : "block", md: "none" },
+                      position: "absolute",
+                      left: 30,
+                      top: 62,
+                      bottom: -16,
+                      width: 1,
+                      bgcolor: colors.blue,
+                      opacity: 0.42,
+                    },
+                  }}
+                >
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    {p.title}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 0.75, color: "text.secondary", lineHeight: 1.6 }}>
+                    {p.text}
+                  </Typography>
+                </Box>
               </Box>
             </Grid>
           ))}
@@ -259,7 +312,7 @@ export default function MethodologyClient() {
         <SectionHeading icon={<SatelliteAltIcon />} overline="Provenance" title="Data sources" />
         <Card sx={{ mb: 8, overflow: "hidden", bgcolor: "#090B0C" }}>
           <TableContainer>
-            <Table>
+            <Table sx={{ minWidth: 760 }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: "#111416" }}>
                   <TableCell sx={{ fontWeight: 700 }}>Source</TableCell>
@@ -272,11 +325,11 @@ export default function MethodologyClient() {
               <TableBody>
                 {SOURCES.map((s) => (
                   <TableRow key={s.name} hover>
-                    <TableCell sx={{ fontWeight: 600 }}>{s.name}</TableCell>
-                    <TableCell sx={{ color: "text.secondary" }}>{s.provider}</TableCell>
-                    <TableCell sx={{ color: "text.secondary" }}>{s.use}</TableCell>
-                    <TableCell sx={{ fontFamily: "var(--font-mono)", color: "text.secondary" }}>{s.resolution}</TableCell>
-                    <TableCell sx={{ fontFamily: "var(--font-mono)", color: "text.secondary" }}>{s.cadence}</TableCell>
+                    <TableCell sx={{ py: 2.25, fontWeight: 600 }}>{s.name}</TableCell>
+                    <TableCell sx={{ py: 2.25, color: "text.secondary" }}>{s.provider}</TableCell>
+                    <TableCell sx={{ py: 2.25, color: "text.secondary" }}>{s.use}</TableCell>
+                    <TableCell sx={{ py: 2.25, fontFamily: "var(--font-mono)", color: "text.secondary" }}>{s.resolution}</TableCell>
+                    <TableCell sx={{ py: 2.25, fontFamily: "var(--font-mono)", color: "text.secondary" }}>{s.cadence}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -297,9 +350,37 @@ export default function MethodologyClient() {
             calibration, mixed pixels and interpolation. Regional aggregates mask
             within-region variability. Astroleet is intended for situational awareness and
             planning; operational decisions should be validated against in-situ measurements
-            and local expertise. The values shown in this demonstration are synthesised to
-            reflect Morocco&apos;s north–south aridity gradient and are not live observations.
+            and local expertise.
           </Typography>
+          <Box
+            role="note"
+            sx={{
+              mt: 3,
+              p: { xs: 2, md: 2.5 },
+              bgcolor: "rgba(231,168,75,0.08)",
+              border: "1px dashed rgba(231,168,75,0.58)",
+            }}
+          >
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1.5}
+              sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
+            >
+              <Box>
+                <Typography variant="overline" sx={{ color: "#F0BE75" }}>
+                  Demonstration disclosure
+                </Typography>
+                <Typography variant="body1" sx={{ mt: 0.5, maxWidth: 740, fontWeight: 700 }}>
+                  Values shown in the experimental layers are synthesised and are not live
+                  observations.
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+                  They model Morocco&apos;s north–south aridity gradient for interface exploration.
+                </Typography>
+              </Box>
+              <DataStatusBadge status="synthetic" label="Demo / non-operational" />
+            </Stack>
+          </Box>
         </Card>
 
         <Divider sx={{ my: 5 }} />
