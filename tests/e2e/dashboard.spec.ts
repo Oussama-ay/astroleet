@@ -85,6 +85,15 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await page.getByRole("button", { name: "Explain with AI" }).click()
   await expect(page.getByRole("heading", { name: "AI-assisted interpretation" })).toBeVisible()
   await expect(page.getByText("A warmer month deserves local verification")).toBeVisible()
+  await expect(page.getByText("nvidia/nemotron-3-ultra-550b-a55b:free")).toBeVisible()
+  await expect(
+    page.getByText("This free OpenRouter endpoint may log request content under its provider policy."),
+  ).toBeVisible()
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+    ),
+  ).toBe(true)
   expect(explanationRequests).toHaveLength(1)
   expect(explanationRequests[0]).toMatchObject({
     series: expect.arrayContaining([
@@ -328,8 +337,8 @@ const aiExplanationResponse = {
     },
   },
   meta: {
-    provider: "OpenAI",
-    model: "gpt-5.6-luna",
+    provider: "OpenRouter",
+    model: "nvidia/nemotron-3-ultra-550b-a55b:free",
     generatedAt: "2026-07-14T16:00:00.000Z",
     requestId: "ad2fb018-43df-4b1d-892e-560cd6614c1d",
   },
