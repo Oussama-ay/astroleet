@@ -65,7 +65,11 @@ export default function AIClimateExplanation({
   }
 
   return (
-    <Box sx={{ mt: 2.5, pt: 2.25, borderTop: `1px solid ${colors.line}` }}>
+    <Box
+      component="section"
+      aria-labelledby="ai-interpretation-title"
+      sx={{ px: { xs: 2, md: 3 }, py: 2.5, borderTop: `1px solid ${colors.line}` }}
+    >
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={1.5}
@@ -77,7 +81,7 @@ export default function AIClimateExplanation({
           </Typography>
           <Stack direction="row" spacing={1} sx={{ mt: 0.25, alignItems: "center" }}>
             <AutoAwesomeOutlinedIcon sx={{ color: colors.blue, fontSize: 20 }} />
-            <Typography component="h4" variant="h6">
+            <Typography id="ai-interpretation-title" component="h3" variant="h5">
               AI-assisted interpretation
             </Typography>
           </Stack>
@@ -136,14 +140,34 @@ export default function AIClimateExplanation({
               {state.response.data.explanation.headline}
             </Typography>
           </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.25, lineHeight: 1.65 }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 1.25, maxWidth: 920, lineHeight: 1.65 }}
+          >
             {state.response.data.explanation.overview}
           </Typography>
-          <Stack sx={{ mt: 2, borderBottom: `1px solid ${colors.line}` }}>
+          <Box
+            sx={{
+              mt: 2,
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(auto-fit, minmax(320px, 1fr))" },
+              borderTop: `1px solid ${colors.line}`,
+              borderBottom: `1px solid ${colors.line}`,
+            }}
+          >
             {state.response.data.explanation.signalExplanations.map((explanation, index) => (
               <Box
                 key={explanation.signalId}
-                sx={{ py: 1.75, borderTop: `1px solid ${colors.line}` }}
+                sx={{
+                  position: "relative",
+                  py: 2,
+                  px: { xs: 0, md: 2.25 },
+                  borderBottom: { xs: `1px solid ${colors.line}`, md: 0 },
+                  borderRight: { md: `1px solid ${colors.line}` },
+                  "&:first-of-type": { pl: 0 },
+                  "&:last-of-type": { pr: 0, borderRight: 0, borderBottom: 0 },
+                }}
               >
                 <Typography variant="overline" sx={{ color: colors.blue }}>
                   Signal {String(index + 1).padStart(2, "0")}
@@ -155,44 +179,49 @@ export default function AIClimateExplanation({
                 </Stack>
               </Box>
             ))}
-          </Stack>
-          <Box sx={{ mt: 2, py: 1.5, px: 1.75, bgcolor: "rgba(240,179,109,0.07)" }}>
-            <Typography variant="overline" sx={{ color: colors.amber }}>
-              Important limitations
-            </Typography>
-            <Stack component="ul" spacing={0.5} sx={{ pl: 2.25, my: 0.5 }}>
-              {state.response.data.explanation.caveats.map((caveat) => (
-                <Typography component="li" variant="caption" color="text.secondary" key={caveat}>
-                  {caveat}
-                </Typography>
-              ))}
-            </Stack>
           </Box>
           <Box
-            sx={{
-              mt: 1.5,
-              display: "grid",
-              gridTemplateColumns: "auto minmax(0, 1fr)",
-              columnGap: 1.5,
-              rowGap: 0.5,
-            }}
+            sx={{ mt: 2, display: "grid", gridTemplateColumns: { xs: "1fr", md: "minmax(0, 2fr) minmax(280px, 1fr)" }, gap: 2 }}
           >
-            <ResultMeta label="Provider" value={state.response.meta.provider} />
-            <ResultMeta label="Model" value={state.response.meta.model} />
-          </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-            AI text may be incomplete; deterministic evidence and local verification remain
-            authoritative.
-          </Typography>
-          {state.response.meta.provider === "OpenRouter" &&
-            state.response.meta.model.endsWith(":free") && (
-              <Typography
-                variant="caption"
-                sx={{ display: "block", mt: 1, pl: 1.25, color: colors.amber, borderLeft: `2px solid ${colors.amber}` }}
-              >
-                This free OpenRouter endpoint may log request content under its provider policy.
+            <Box sx={{ py: 1.5, px: 1.75, bgcolor: "rgba(240,179,109,0.07)" }}>
+              <Typography variant="overline" sx={{ color: colors.amber }}>
+                Important limitations
               </Typography>
-            )}
+              <Stack component="ul" spacing={0.5} sx={{ pl: 2.25, my: 0.5 }}>
+                {state.response.data.explanation.caveats.map((caveat) => (
+                  <Typography component="li" variant="caption" color="text.secondary" key={caveat}>
+                    {caveat}
+                  </Typography>
+                ))}
+              </Stack>
+            </Box>
+            <Box>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "auto minmax(0, 1fr)",
+                  columnGap: 1.5,
+                  rowGap: 0.5,
+                }}
+              >
+                <ResultMeta label="Provider" value={state.response.meta.provider} />
+                <ResultMeta label="Model" value={state.response.meta.model} />
+              </Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+                AI text may be incomplete; deterministic evidence and local verification remain
+                authoritative.
+              </Typography>
+              {state.response.meta.provider === "OpenRouter" &&
+                state.response.meta.model.endsWith(":free") && (
+                  <Typography
+                    variant="caption"
+                    sx={{ display: "block", mt: 1, pl: 1.25, color: colors.amber, borderLeft: `2px solid ${colors.amber}` }}
+                  >
+                    This free OpenRouter endpoint may log request content under its provider policy.
+                  </Typography>
+                )}
+            </Box>
+          </Box>
         </Box>
       )}
     </Box>

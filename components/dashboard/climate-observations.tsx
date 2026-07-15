@@ -34,10 +34,12 @@ import {
   MOROCCO_GEOGRAPHIC_BOUNDS,
 } from "@/lib/domain/morocco-geography"
 import { colors } from "@/lib/theme"
+import { assessObservedClimate } from "@/lib/domain/observed-climate-recommendations"
 import ClimateHistory from "./climate-history"
 import DashboardShareActions from "./dashboard-share-actions"
 import ClimateExportActions from "./climate-export-actions"
 import ObservedClimateRecommendations from "./observed-climate-recommendations"
+import AIClimateExplanation from "./ai-climate-explanation"
 
 interface PowerApiResponse {
   data: {
@@ -424,6 +426,7 @@ function ClimateLoading() {
 
 function ClimateResults({ response }: { response: PowerApiResponse }) {
   const provenance = response.data.series[0]
+  const assessment = assessObservedClimate(response.data.series)
 
   return (
     <>
@@ -494,6 +497,13 @@ function ClimateResults({ response }: { response: PowerApiResponse }) {
           <ObservedClimateRecommendations series={response.data.series} />
         </Grid>
       </Grid>
+
+      {assessment.status !== "insufficient" && (
+        <AIClimateExplanation
+          key={`${assessment.observedAt}:${assessment.baselineStartYear}:${assessment.baselineEndYear}`}
+          series={response.data.series}
+        />
+      )}
 
       {provenance && (
         <Box

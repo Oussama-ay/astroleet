@@ -15,7 +15,6 @@ import {
 } from "@/lib/domain/observed-climate-recommendations"
 import type { EnvironmentalSeries } from "@/lib/domain/environment"
 import { colors } from "@/lib/theme"
-import AIClimateExplanation from "./ai-climate-explanation"
 
 const SIGNAL_STYLE: Record<
   ObservedSignalSeverity,
@@ -154,10 +153,6 @@ export default function ObservedClimateRecommendations({
               )
             })}
           </Stack>
-          <AIClimateExplanation
-            key={`${assessment.observedAt}:${assessment.baselineStartYear}:${assessment.baselineEndYear}`}
-            series={series}
-          />
         </>
       )}
 

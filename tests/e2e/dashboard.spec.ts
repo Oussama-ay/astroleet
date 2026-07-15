@@ -85,6 +85,16 @@ test("dashboard loads its core monitoring experience", async ({ page }) => {
   await page.getByRole("button", { name: "Explain with AI" }).click()
   await expect(page.getByRole("heading", { name: "AI-assisted interpretation" })).toBeVisible()
   await expect(page.getByText("A warmer month deserves local verification")).toBeVisible()
+  await expect(
+    page
+      .getByRole("region", { name: "Observed signals" })
+      .getByRole("region", { name: "AI-assisted interpretation" }),
+  ).toHaveCount(0)
+  await expect(
+    page
+      .getByRole("region", { name: "Climate record" })
+      .getByRole("region", { name: "AI-assisted interpretation" }),
+  ).toBeVisible()
   await expect(page.getByText("nvidia/nemotron-3-ultra-550b-a55b:free")).toBeVisible()
   await expect(
     page.getByText("This free OpenRouter endpoint may log request content under its provider policy."),
