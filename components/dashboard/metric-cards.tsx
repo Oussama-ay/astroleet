@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardActionArea, Box, Typography, Stack, Grid } from "@mui/material"
+import { Box, ButtonBase, Typography, Stack, Grid } from "@mui/material"
 import GrassIcon from "@mui/icons-material/Grass"
 import WaterDropIcon from "@mui/icons-material/WaterDrop"
 import ThermostatIcon from "@mui/icons-material/Thermostat"
@@ -16,6 +16,7 @@ import {
 } from "@/lib/data"
 import { colorFor } from "@/lib/scale"
 import { colors } from "@/lib/theme"
+import DataStatusBadge from "@/components/data-status-badge"
 
 const ICONS: Record<MetricKey, React.ReactNode> = {
   ndvi: <GrassIcon />,
@@ -34,7 +35,16 @@ export default function MetricCards({ region, active, onSelect }: Props) {
   const order: MetricKey[] = ["ndvi", "moisture", "lst"]
 
   return (
-    <Grid container spacing={2.5}>
+    <Grid
+      container
+      spacing={0}
+      sx={{
+        border: "1px dashed rgba(231,168,75,0.52)",
+        bgcolor: "rgba(28,22,13,0.76)",
+        backgroundImage:
+          "repeating-linear-gradient(135deg, transparent 0, transparent 16px, rgba(231,168,75,0.018) 16px, rgba(231,168,75,0.018) 32px)",
+      }}
+    >
       {order.map((key) => {
         const def = METRICS[key]
         const value = values[key]
@@ -47,25 +57,35 @@ export default function MetricCards({ region, active, onSelect }: Props) {
         const accent = colorFor(key, value)
 
         return (
-          <Grid size={{ xs: 12, sm: 4 }} key={key}>
-            <Card
+          <Grid
+            size={{ xs: 12, sm: 4 }}
+            key={key}
+            sx={{
+              borderRight: { sm: `1px solid ${colors.line}` },
+              borderBottom: { xs: `1px solid ${colors.line}`, sm: 0 },
+              "&:last-of-type": { borderRight: 0, borderBottom: 0 },
+            }}
+          >
+            <ButtonBase
+              onClick={() => onSelect(key)}
               sx={{
+                display: "block",
+                width: "100%",
                 height: "100%",
-                borderColor: isActive ? "primary.main" : colors.line,
-                borderWidth: isActive ? 2 : 1,
+                p: { xs: 2, md: 2.5 },
+                textAlign: "left",
                 position: "relative",
                 overflow: "hidden",
-                bgcolor: "#090B0C",
+                bgcolor: isActive ? "rgba(231,168,75,0.09)" : "transparent",
               }}
             >
-              <CardActionArea onClick={() => onSelect(key)} sx={{ p: 2.5, height: "100%" }}>
                 <Box
                   sx={{
                     position: "absolute",
-                    top: 0,
+                    top: 18,
                     left: 0,
-                    right: 0,
-                    height: 4,
+                    bottom: 18,
+                    width: isActive ? "3px" : "1px",
                     bgcolor: accent,
                   }}
                 />
@@ -74,41 +94,35 @@ export default function MetricCards({ region, active, onSelect }: Props) {
                     sx={{
                       width: 40,
                       height: 40,
-                      borderRadius: 0,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      bgcolor: "rgba(15,95,166,0.08)",
-                      color: "primary.main",
+                      color: accent,
                     }}
                   >
                     {ICONS[key]}
                   </Box>
-                  <Stack
-                    direction="row"
-                    spacing={0.5}
-                    sx={{
-                      alignItems: "center",
-                      px: 1,
-                      py: 0.25,
-                      borderRadius: 0,
-                      bgcolor: positive ? colors.greenSoft : "#2B1A12",
-                      color: positive ? colors.greenDark : "#F0B36D",
-                    }}
-                  >
-                    {delta >= 0 ? (
-                      <TrendingUpIcon sx={{ fontSize: 15 }} />
-                    ) : (
-                      <TrendingDownIcon sx={{ fontSize: 15 }} />
-                    )}
-                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                      {delta >= 0 ? "+" : ""}
-                      {key === "ndvi" ? delta.toFixed(2) : delta.toFixed(1)}
-                    </Typography>
+                  <Stack spacing={1} sx={{ alignItems: "flex-end" }}>
+                    <DataStatusBadge status="synthetic" />
+                    <Stack
+                      direction="row"
+                      spacing={0.5}
+                      sx={{ alignItems: "center", color: positive ? colors.greenDark : "#F0B36D" }}
+                    >
+                      {delta >= 0 ? (
+                        <TrendingUpIcon sx={{ fontSize: 15 }} />
+                      ) : (
+                        <TrendingDownIcon sx={{ fontSize: 15 }} />
+                      )}
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                        {delta >= 0 ? "+" : ""}
+                        {key === "ndvi" ? delta.toFixed(2) : delta.toFixed(1)}
+                      </Typography>
+                    </Stack>
                   </Stack>
                 </Stack>
 
-                <Typography variant="body2" sx={{ mt: 2, color: "text.secondary", fontWeight: 600 }}>
+                <Typography variant="overline" sx={{ mt: 2, display: "block", color: "text.secondary" }}>
                   {def.label}
                 </Typography>
                 <Typography
@@ -120,8 +134,7 @@ export default function MetricCards({ region, active, onSelect }: Props) {
                 <Typography variant="caption" sx={{ color: "text.secondary" }}>
                   vs. previous month
                 </Typography>
-              </CardActionArea>
-            </Card>
+            </ButtonBase>
           </Grid>
         )
       })}

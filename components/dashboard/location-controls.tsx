@@ -9,7 +9,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material"
-import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined"
 import { METRICS, REGIONS, type MetricKey, type Region } from "@/lib/data"
 import { colors } from "@/lib/theme"
 
@@ -24,8 +23,8 @@ export default function LocationControls({ region, metric, onRegionChange, onMet
   return (
     <Stack spacing={2.5}>
       <Box>
-        <Typography variant="overline" sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}>
-          <PlaceOutlinedIcon sx={{ fontSize: 16 }} /> Region
+        <Typography variant="overline" sx={{ color: "text.secondary" }}>
+          Administrative region
         </Typography>
         <Autocomplete
           size="small"
@@ -33,7 +32,7 @@ export default function LocationControls({ region, metric, onRegionChange, onMet
           options={REGIONS.map((r) => r.name)}
           value={region.name}
           onChange={(_, v) => v && onRegionChange(v)}
-          sx={{ mt: 1 }}
+          sx={{ mt: 1.25 }}
           renderInput={(params) => <TextField {...params} placeholder="Select region" />}
         />
         <Typography variant="caption" sx={{ mt: 1, display: "block", color: "text.secondary" }}>
@@ -43,7 +42,7 @@ export default function LocationControls({ region, metric, onRegionChange, onMet
 
       <Box>
         <Typography variant="overline" sx={{ color: "text.secondary" }}>
-          Active layer
+          Map layer
         </Typography>
         <ToggleButtonGroup
           value={metric}
@@ -53,20 +52,24 @@ export default function LocationControls({ region, metric, onRegionChange, onMet
           sx={{
             mt: 1,
             flexDirection: "column",
-            gap: 1,
+            gap: 0,
+            border: `1px solid ${colors.line}`,
             "& .MuiToggleButton-root": {
               justifyContent: "flex-start",
               textTransform: "none",
               borderRadius: "0 !important",
-              border: `1px solid ${colors.line} !important`,
+              border: "0 !important",
+              borderBottom: `1px solid ${colors.line} !important`,
+              borderLeft: "3px solid transparent !important",
               px: 1.5,
-              py: 1,
+              py: 1.25,
               color: "text.secondary",
+              "&:last-of-type": { borderBottom: "0 !important" },
             },
             "& .Mui-selected": {
-              bgcolor: `${colors.blueSoft} !important`,
+              bgcolor: "rgba(85,167,232,0.08) !important",
               color: `${colors.white} !important`,
-              borderColor: `${colors.blue} !important`,
+              borderLeftColor: `${colors.blue} !important`,
             },
           }}
         >
@@ -77,7 +80,7 @@ export default function LocationControls({ region, metric, onRegionChange, onMet
                   {METRICS[k].short}
                 </Typography>
                 <Typography variant="caption" sx={{ color: "text.secondary", textAlign: "left" }}>
-                  {METRICS[k].label}
+                  Synthetic regional layer
                 </Typography>
               </Stack>
             </ToggleButton>

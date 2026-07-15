@@ -17,18 +17,26 @@ runtime and resource limits of normal web requests.
 ```text
 Browser
   └─ Next.js pages and client components
-       ├─ regional controls and SVG choropleth
-       ├─ charts and recommendation cards
+       ├─ regional controls and Morocco-restricted Leaflet map
+       ├─ observed climate charts, exports, and sharing
        ├─ local Morocco boundary data
-       └─ deterministic demonstration values from lib/data.ts
+       └─ clearly labelled demonstration satellite layers
+                 │
+                 ▼
+Next.js server
+  ├─ validated NASA POWER point and sampled-radius routes
+  ├─ caching, provenance, rate limiting, and request telemetry
+  ├─ deterministic climate screening
+  └─ optional server-only OpenRouter or OpenAI explanations
 ```
 
-The current dashboard contains no live environmental-provider integration and
-requires no runtime secrets. Its NDVI, soil-moisture, land-surface-temperature,
-and history values are synthetic. This status must remain visible until each
-indicator is replaced by an observed-data pipeline.
+The current dashboard provides observed monthly NASA POWER temperature,
+precipitation, and relative-humidity data. Its NDVI, soil-moisture,
+land-surface-temperature, and satellite-layer history values remain synthetic.
+AI is optional and requires a server-side provider key; the observed climate
+workflow works without it.
 
-## Target system
+## Current and planned boundaries
 
 ```text
 Browser
@@ -42,14 +50,15 @@ Next.js server
   ├─ provider adapters and response caching
   ├─ deterministic aggregation and recommendation rules
   ├─ rate limiting, logging, and provenance
-  └─ server-only AI orchestration when introduced
+  └─ server-only AI orchestration
                  │
                  ▼
 External providers
-  ├─ NASA POWER climate data
-  ├─ Sentinel-derived vegetation data
-  ├─ land-surface-temperature products
-  └─ soil-moisture products
+  ├─ NASA POWER climate data (implemented)
+  ├─ OpenRouter or OpenAI explanations (optional, implemented)
+  ├─ Sentinel-derived vegetation data (planned)
+  ├─ land-surface-temperature products (planned)
+  └─ soil-moisture products (planned)
                  │
                  ▼
 Optional persistence
@@ -138,8 +147,7 @@ evidence when required measurements are unavailable.
 
 - Secrets are stored only in server-side environment variables.
 - Secret names must not use the `NEXT_PUBLIC_` prefix.
-- When variables are introduced, `.env.example` contains their names and
-  documentation, never credentials.
+- `.env.example` contains variable names and documentation, never credentials.
 - Inputs are validated before provider, database, or AI calls.
 - Provider and AI routes receive rate limits, timeouts, and bounded output.
 - Logs must not contain credentials or unnecessary precise user locations.
@@ -152,13 +160,13 @@ PostgreSQL when accounts, saved locations, alerts, or durable analysis history
 become product requirements. Add geographic extensions only when server-side
 spatial queries justify their operational cost.
 
-## Delivery sequence
+## Delivery status
 
-1. Establish repository quality checks and domain contracts.
-2. Add cached NASA POWER access behind a Next.js endpoint.
-3. Show live climate results with provenance beside clearly labelled demo data.
-4. Add point, radius, historical, sharing, and export workflows.
-5. Ground deterministic recommendations in observed measurements.
-6. Add structured AI explanations after data and recommendation tests exist.
-7. Add persistence and scheduled monitoring when users can save locations.
-8. Replace demonstration satellite indicators one observed pipeline at a time.
+1. Repository quality checks and domain contracts — implemented.
+2. Cached NASA POWER access behind Next.js endpoints — implemented.
+3. Observed climate results with provenance beside labelled demo data — implemented.
+4. Point, radius, history, sharing, and export workflows — implemented.
+5. Deterministic recommendations grounded in observed measurements — implemented.
+6. Structured, evidence-constrained AI explanations — implemented.
+7. Persistence and scheduled monitoring for saved locations — planned.
+8. Replacement of demonstration satellite indicators — planned, one pipeline at a time.

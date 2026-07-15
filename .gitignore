@@ -11,6 +11,12 @@ build/
 # Production
 dist/
 
+# Test output
+playwright-report/
+test-results/
+blob-report/
+coverage/
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

@@ -1,173 +1,97 @@
 "use client"
 
 import * as React from "react"
-import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps"
-import { geoMercator } from "d3-geo"
-import { Box, Typography, Stack } from "@mui/material"
-import geoData from "@/lib/morocco-regions.json"
-import { METRICS, metricsForRegion, REGIONS, type MetricKey, formatMetric } from "@/lib/data"
-import { colorFor, rampStops } from "@/lib/scale"
+import dynamic from "next/dynamic"
+import { Box, Skeleton, Stack, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
+import { METRICS, type MetricKey, formatMetric } from "@/lib/data"
+import type { DashboardClimateLocation } from "@/lib/domain/dashboard-share"
+import { rampStops } from "@/lib/scale"
 import { colors } from "@/lib/theme"
 
 interface Props {
   metric: MetricKey
   selected: string
-  onSelect: (name: string) => void
+  location: DashboardClimateLocation
+  onRegionSelect: (name: string) => void
+  onPointSelect: (regionName: string, latitude: number, longitude: number) => void
 }
 
-const WIDTH = 800
-const HEIGHT = 620
+const MoroccoLeafletMap = dynamic(() => import("./morocco-leaflet-map"), {
+  ssr: false,
+  loading: () => (
+    <Skeleton
+      variant="rectangular"
+      aria-label="Loading interactive Morocco map"
+      sx={{ height: "clamp(430px, 65vw, 620px)", bgcolor: "rgba(255,255,255,0.05)" }}
+    />
+  ),
+})
 
-// Fit the whole Morocco geometry into the viewport once, deterministically.
-const projection = geoMercator().fitExtent(
-  [
-    [28, 28],
-    [WIDTH - 28, HEIGHT - 28],
-  ],
-  geoData as never,
-)
-
-function regionByName(name: string) {
-  return REGIONS.find((r) => r.name === name)
-}
-
-export default function MoroccoMap({ metric, selected, onSelect }: Props) {
-  const [hover, setHover] = React.useState<string | null>(null)
-  const [mounted, setMounted] = React.useState(false)
+export default function MoroccoMap({
+  metric,
+  selected,
+  location,
+  onRegionSelect,
+  onPointSelect,
+}: Props) {
+  const [selectionMode, setSelectionMode] = React.useState<"region" | "point">("region")
   const def = METRICS[metric]
   const stops = rampStops(metric)
 
-  React.useEffect(() => setMounted(true), [])
-
   return (
     <Box sx={{ position: "relative" }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1}
+        sx={{ mb: 1.5, justifyContent: "space-between", alignItems: { sm: "center" } }}
+      >
+        <Typography variant="caption" color="text.secondary">
+          {selectionMode === "region"
+            ? "Choose a Moroccan region for its centroid and demonstration indicators."
+            : "Click inside Morocco to analyze that exact climate point."}
+        </Typography>
+        <ToggleButtonGroup
+          value={selectionMode}
+          exclusive
+          size="small"
+          aria-label="Map selection mode"
+          onChange={(_, value) => value && setSelectionMode(value)}
+          sx={{
+            border: `1px solid ${colors.line}`,
+            "& .MuiToggleButton-root": {
+              border: 0,
+              color: "text.secondary",
+              "&.Mui-selected": {
+                color: colors.white,
+                bgcolor: "rgba(85,167,232,0.18)",
+                boxShadow: `inset 0 -2px 0 ${colors.blue}`,
+              },
+              "&.Mui-selected:hover": { bgcolor: "rgba(85,167,232,0.24)" },
+            },
+          }}
+        >
+          <ToggleButton value="region">Region select</ToggleButton>
+          <ToggleButton value="point">Point select</ToggleButton>
+        </ToggleButtonGroup>
+      </Stack>
+
       <Box
         sx={{
-          borderRadius: 0,
           overflow: "hidden",
           bgcolor: "#050607",
           border: `1px solid ${colors.line}`,
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px)",
-          backgroundSize: "30px 30px",
         }}
       >
-        {!mounted && <Box sx={{ width: "100%", aspectRatio: `${WIDTH} / ${HEIGHT}` }} />}
-        {mounted && (
-        <ComposableMap
-          projection={projection}
-          width={WIDTH}
-          height={HEIGHT}
-          style={{ width: "100%", height: "auto", display: "block" }}
-        >
-          <Geographies geography={geoData as object}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
-                const name = String(geo.properties.name)
-                const region = regionByName(name)
-                const value = region ? metricsForRegion(region)[metric] : def.min
-                const isSelected = name === selected
-                const fill = colorFor(metric, value)
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    onMouseEnter={() => setHover(name)}
-                    onMouseLeave={() => setHover(null)}
-                    onClick={() => onSelect(name)}
-                    tabIndex={-1}
-                    style={{
-                      default: {
-                        fill,
-                        stroke: isSelected ? colors.white : "rgba(255,255,255,0.38)",
-                        strokeWidth: isSelected ? 2 : 0.8,
-                        outline: "none",
-                        cursor: "pointer",
-                        transition: "fill 200ms ease, stroke 150ms ease",
-                      },
-                      hover: {
-                        fill,
-                        stroke: colors.white,
-                        strokeWidth: 1.8,
-                        outline: "none",
-                        cursor: "pointer",
-                      },
-                      pressed: { fill, stroke: colors.white, strokeWidth: 2, outline: "none" },
-                    }}
-                  />
-                )
-              })
-            }
-          </Geographies>
-
-          {REGIONS.map((r) => {
-            const active = r.name === selected
-            return (
-              <Marker key={r.name} coordinates={[r.lon, r.lat]}>
-                <circle
-                  r={active ? 5 : 2.6}
-                  fill={active ? colors.white : "rgba(255,255,255,0.64)"}
-                  stroke="#050607"
-                  strokeWidth={active ? 1.6 : 0.9}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => onSelect(r.name)}
-                />
-                {active && (
-                  <text
-                    textAnchor="middle"
-                    y={-10}
-                    style={{
-                      fontFamily: "var(--font-mono), monospace",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      fill: colors.white,
-                      paintOrder: "stroke",
-                      stroke: "#050607",
-                      strokeWidth: 3,
-                    }}
-                  >
-                    {r.name}
-                  </text>
-                )}
-              </Marker>
-            )
-          })}
-        </ComposableMap>
-        )}
+        <MoroccoLeafletMap
+          metric={metric}
+          selected={selected}
+          location={location}
+          selectionMode={selectionMode}
+          onRegionSelect={onRegionSelect}
+          onPointSelect={onPointSelect}
+        />
       </Box>
 
-      {/* Hover tooltip */}
-      {hover &&
-        (() => {
-          const r = regionByName(hover)
-          if (!r) return null
-          return (
-            <Box
-              sx={{
-                position: "absolute",
-                top: 12,
-                left: 12,
-                px: 1.75,
-                py: 1,
-                borderRadius: 0,
-                bgcolor: "rgba(5,6,7,0.94)",
-                border: `1px solid ${colors.line}`,
-                color: "#EAF2EF",
-                pointerEvents: "none",
-                maxWidth: 240,
-              }}
-            >
-              <Typography variant="subtitle2" sx={{ color: "#fff" }}>
-                {hover}
-              </Typography>
-              <Typography variant="caption" sx={{ fontFamily: "var(--font-mono)" }}>
-                {def.short}: {formatMetric(metric, metricsForRegion(r)[metric])}
-              </Typography>
-            </Box>
-          )
-        })()}
-
-      {/* Legend */}
       <Stack
         direction="row"
         spacing={1.5}
@@ -184,7 +108,6 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
             sx={{
               width: 160,
               height: 10,
-              borderRadius: 0,
               background: `linear-gradient(90deg, ${stops.join(", ")})`,
               border: `1px solid ${colors.line}`,
             }}
@@ -193,6 +116,16 @@ export default function MoroccoMap({ metric, selected, onSelect }: Props) {
             {formatMetric(metric, def.max)}
           </Typography>
         </Box>
+        {location.mode !== "region" && (
+          <Typography variant="caption" sx={{ color: colors.blue }}>
+            Analysis point · {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+          </Typography>
+        )}
+        {location.mode === "radius" && (
+          <Typography variant="caption" sx={{ color: colors.green }}>
+            Dashed outline · {location.radiusKm} km radius
+          </Typography>
+        )}
       </Stack>
     </Box>
   )

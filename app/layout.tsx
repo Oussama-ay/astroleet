@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter, IBM_Plex_Mono } from 'next/font/google'
 import ThemeRegistry from '@/components/theme-registry'
+import 'leaflet/dist/leaflet.css'
 import './globals.css'
 
 const inter = Inter({

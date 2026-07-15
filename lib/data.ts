@@ -2,6 +2,11 @@
 // Values are synthesised from a seeded generator so the dashboard is stable
 // across renders while remaining representative of Moroccan agro-climatic zones.
 
+import {
+  parseEnvironmentalSeries,
+  type EnvironmentalSeries,
+} from "./domain/environment"
+
 export type MetricKey = "ndvi" | "moisture" | "lst"
 
 export interface MetricDef {
@@ -78,7 +83,7 @@ export const REGIONS: Region[] = [
 
 // aridity increases from north to south -> use latitude to shape values
 function seeded(seed: number) {
-  let s = Math.sin(seed) * 10000
+  const s = Math.sin(seed) * 10000
   return s - Math.floor(s)
 }
 
@@ -94,7 +99,7 @@ export interface RegionMetrics {
   lst: number
 }
 
-export function metricsForRegion(region: Region): RegionMetrics {
+function baseMetricsForRegion(region: Region): RegionMetrics {
   // north (lat ~35) greener/cooler, south (lat ~23) drier/hotter
   const aridity = clamp((35.5 - region.lat) / 12, 0, 1)
   const jitter = seeded(hash(region.name))
@@ -111,8 +116,8 @@ export function metricsForRegion(region: Region): RegionMetrics {
 export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 // 12-month synthetic history with a seasonal signal (wet winters, dry summers).
-export function historyForRegion(region: Region, metric: MetricKey): number[] {
-  const base = metricsForRegion(region)[metric]
+function demoHistoryForRegion(region: Region, metric: MetricKey): number[] {
+  const base = baseMetricsForRegion(region)[metric]
   const def = METRICS[metric]
   const phase = hash(region.name + metric) % 6
   return MONTHS.map((_, i) => {
@@ -124,6 +129,90 @@ export function historyForRegion(region: Region, metric: MetricKey): number[] {
     const v = base + dir * season * amp + wobble
     return clamp(round(v, metric === "ndvi" ? 2 : 1), def.min, def.max)
   })
+}
+
+const DEMO_PERIOD_START = "2025-01-01T00:00:00.000Z"
+const DEMO_PERIOD_END = "2025-12-31T23:59:59.000Z"
+const DEMO_PROCESSED_AT = "2026-01-01T00:00:00.000Z"
+const seriesCache = new Map<string, EnvironmentalSeries>()
+
+export function environmentalSeriesForRegion(
+  region: Region,
+  metric: MetricKey,
+): EnvironmentalSeries {
+  const cacheKey = `${region.name}:${metric}`
+  const cached = seriesCache.get(cacheKey)
+  if (cached) return cached
+
+  const values = demoHistoryForRegion(region, metric)
+  values[values.length - 1] = baseMetricsForRegion(region)[metric]
+
+  const series = parseEnvironmentalSeries({
+    schemaVersion: "1.0",
+    parameter: metric,
+    unit: METRICS[metric].unit || "1",
+    coverage: {
+      type: "region",
+      id: region.name,
+      name: region.name,
+      centroid: {
+        latitude: region.lat,
+        longitude: region.lon,
+      },
+    },
+    period: {
+      start: DEMO_PERIOD_START,
+      end: DEMO_PERIOD_END,
+      aggregation: "monthly",
+    },
+    source: {
+      provider: "Astroleet",
+      product: "Deterministic agro-climatic demonstration model",
+      version: "1.0",
+      documentation: "/methodology",
+    },
+    resolution: {
+      spatial: "Morocco ADM1 region",
+      temporal: "Monthly synthetic composite",
+    },
+    processedAt: DEMO_PROCESSED_AT,
+    status: "demonstration",
+    values: values.map((value, monthIndex) => ({
+      observedAt: new Date(Date.UTC(2025, monthIndex, 1)).toISOString(),
+      value,
+      quality: {
+        status: "estimated",
+        flags: ["synthetic", "not-for-operational-use"],
+        notes: ["Generated from Astroleet's deterministic demonstration model"],
+      },
+    })),
+  })
+
+  seriesCache.set(cacheKey, series)
+  return series
+}
+
+function demoValue(value: number | null): number {
+  if (value === null) {
+    throw new Error("Demonstration series unexpectedly contains a missing value")
+  }
+  return value
+}
+
+export function metricsForRegion(region: Region): RegionMetrics {
+  return {
+    ndvi: demoValue(environmentalSeriesForRegion(region, "ndvi").values.at(-1)?.value ?? null),
+    moisture: demoValue(
+      environmentalSeriesForRegion(region, "moisture").values.at(-1)?.value ?? null,
+    ),
+    lst: demoValue(environmentalSeriesForRegion(region, "lst").values.at(-1)?.value ?? null),
+  }
+}
+
+export function historyForRegion(region: Region, metric: MetricKey): number[] {
+  return environmentalSeriesForRegion(region, metric).values.map((entry) =>
+    demoValue(entry.value),
+  )
 }
 
 // Evidence-based recommendation engine driven by the region's current metrics.

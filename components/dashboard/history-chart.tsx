@@ -4,6 +4,7 @@ import { Box, Typography, Stack } from "@mui/material"
 import { LineChart } from "@mui/x-charts/LineChart"
 import { METRICS, historyForRegion, MONTHS, type MetricKey, type Region } from "@/lib/data"
 import { colors } from "@/lib/theme"
+import DataStatusBadge from "@/components/data-status-badge"
 
 const SERIES_COLOR: Record<MetricKey, string> = {
   ndvi: colors.green,
@@ -23,19 +24,19 @@ export default function HistoryChart({ region, metric }: Props) {
 
   return (
     <Box>
-      <Stack direction="row" sx={{ mb: 1, justifyContent: "space-between", alignItems: "baseline" }}>
+      <Stack direction="row" spacing={2} sx={{ mb: 1, justifyContent: "space-between", alignItems: "flex-start" }}>
         <Box>
-          <Typography variant="h6">Twelve-month history</Typography>
+          <Typography variant="overline" color="text.secondary">
+            Synthetic composite
+          </Typography>
+          <Typography variant="h6" sx={{ mt: 0.25 }}>
+            Twelve-month model
+          </Typography>
           <Typography variant="body2" color="text.secondary">
             {def.label} · {region.name}
           </Typography>
         </Box>
-        <Typography
-          variant="caption"
-          sx={{ fontFamily: "var(--font-mono)", color: "text.secondary" }}
-        >
-          monthly composite
-        </Typography>
+        <DataStatusBadge status="synthetic" />
       </Stack>
 
       <Box sx={{ width: "100%", height: 300 }}>

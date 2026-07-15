@@ -7,22 +7,25 @@ and transparent methodology.
 
 ## Data status
 
-The current dashboard is a demonstration. Environmental values and 12-month
-histories are deterministic synthetic data modelled on Morocco's north-to-south
-agro-climatic gradient. They are not live satellite observations and must not
-be used for operational decisions.
+The dashboard combines observed monthly NASA POWER climate data with clearly
+labelled demonstration satellite layers. Temperature, precipitation, and
+humidity observations are retrieved through cached server-side Astroleet APIs.
+The NDVI, soil-moisture, land-surface-temperature, and 12-month satellite-layer
+histories remain deterministic synthetic data and must not be treated as live
+satellite measurements.
 
-The regional boundaries are real geographic data. Live provider integrations,
-beginning with NASA POWER climate data, will be added behind server-side
-Astroleet APIs. The architecture and data-boundary decisions are documented in
-[docs/architecture.md](docs/architecture.md).
+Regional boundaries are real geographic data. The architecture and data
+boundaries are documented in [docs/architecture.md](docs/architecture.md).
 
 ## Current product
 
 - Cinematic overview of the Morocco environmental-monitoring mission.
-- Interactive choropleth for Morocco's 12 regions.
+- Morocco-restricted Leaflet explorer for regional and point analysis.
+- Observed NASA POWER climate history with point and sampled-radius workflows.
+- Deterministic anomaly screening with optional grounded AI explanations.
+- Shareable analysis URLs and CSV/JSON exports with provenance.
 - Demonstration layers for NDVI, soil moisture, and land-surface temperature.
-- Twelve-month demonstration histories and rule-based recommendations.
+- Twelve-month synthetic histories and rule-based recommendations.
 - Methodology, processing pipeline, provenance, and uncertainty documentation.
 - Responsive dark interface built for desktop and mobile browsers.
 
@@ -31,7 +34,9 @@ Astroleet APIs. The architecture and data-boundary decisions are documented in
 - Next.js 16 App Router
 - React 19 and TypeScript
 - Material UI and MUI X Charts
-- React Simple Maps and D3 geographic projection
+- Leaflet and React Leaflet
+- OpenAI SDK with OpenRouter/OpenAI provider support
+- Zod-validated environmental and AI contracts
 - Tailwind CSS 4
 - pnpm
 - Vercel Analytics in production
@@ -52,8 +57,8 @@ corepack pnpm dev
 
 Open `http://localhost:3000`.
 
-No environment variables are currently required. The example file documents
-the security rules that future data-provider integrations must follow.
+NASA POWER observations work without credentials. AI explanations are optional
+and require the server-only variables documented in `.env.example`.
 
 ## Commands
 
@@ -61,6 +66,9 @@ the security rules that future data-provider integrations must follow.
 | --- | --- |
 | `corepack pnpm dev` | Start the development server. |
 | `corepack pnpm lint` | Run ESLint. |
+| `corepack pnpm typecheck` | Validate TypeScript. |
+| `corepack pnpm test` | Run unit tests. |
+| `corepack pnpm test:e2e` | Run the dashboard browser test. |
 | `corepack pnpm build` | Create a production build. |
 | `corepack pnpm start` | Run the production build. |
 
@@ -74,6 +82,39 @@ lib/                    Domain data, scales, theme, and geographic boundaries
 public/                 Images, videos, icons, and public geographic data
 docs/                   Architecture and engineering decisions
 ```
+
+## Optional AI climate explanations
+
+The observed-climate dashboard works without AI. It supports OpenRouter or OpenAI for its
+on-demand, evidence-constrained explanations. Copy the example environment file:
+
+```bash
+cp .env.example .env.local
+```
+
+Set `AI_API_KEY` in `.env.local`, then restart the development server. The example selects
+`openrouter` with `nvidia/nemotron-3-ultra-550b-a55b:free`. Keep the key server-side: never use a
+`NEXT_PUBLIC_` name, paste it into client code, or commit `.env.local`.
+
+Existing `OPENAI_API_KEY` and `OPENAI_MODEL` variables remain compatible. When a legacy model name
+contains `/`, Astroleet infers OpenRouter, so current local environments do not need an immediate
+rename. For OpenAI, set `AI_PROVIDER=openai`, `AI_API_KEY`, and an OpenAI model in `AI_MODEL`.
+
+OpenRouter's page for this free Nemotron endpoint states that request content may be logged for
+security and NVIDIA product improvement. Astroleet excludes exact point coordinates and only sends
+compact climate evidence, but do not use a free endpoint for confidential data. Review the
+[model policy and endpoint details](https://openrouter.ai/nvidia/nemotron-3-ultra-550b-a55b%3Afree)
+before production use.
+
+For deployed environments, add the same variables through the hosting provider's encrypted
+environment settings. Use separate provider keys for preview and production when possible, and
+configure provider budget and rate-limit controls.
+
+The AI route includes privacy-safe request logs, request IDs, and a best-effort per-instance burst
+limit. See [the operations guide](docs/operations.md) for health checks, configuration, telemetry,
+and the boundary before durable saved-location monitoring.
+
+If port `3000` is already in use, Next.js may ask to use another port. Accept it, then open the URL printed in the terminal.
 
 ## Package installation
 
@@ -104,6 +145,5 @@ corepack pnpm lint
 corepack pnpm build
 ```
 
-Environment variables introduced by future server integrations must be added
-to the deployment environment and documented in `.env.example` without secret
-values.
+Required server variables must be added to the deployment environment and
+documented in `.env.example` without secret values.
