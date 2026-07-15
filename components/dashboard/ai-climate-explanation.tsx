@@ -65,20 +65,23 @@ export default function AIClimateExplanation({
   }
 
   return (
-    <Box sx={{ mt: 2, p: 2, border: `1px solid ${colors.line}`, bgcolor: colors.sandSoft }}>
+    <Box sx={{ mt: 2.5, pt: 2.25, borderTop: `1px solid ${colors.line}` }}>
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={1.5}
-        sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
+        sx={{ justifyContent: "space-between", alignItems: { sm: "flex-start" } }}
       >
-        <Box>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <AutoAwesomeOutlinedIcon sx={{ color: colors.blue }} />
-            <Typography component="h4" variant="subtitle1" sx={{ fontWeight: 700 }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="overline" sx={{ color: colors.blue }}>
+            Model synthesis
+          </Typography>
+          <Stack direction="row" spacing={1} sx={{ mt: 0.25, alignItems: "center" }}>
+            <AutoAwesomeOutlinedIcon sx={{ color: colors.blue, fontSize: 20 }} />
+            <Typography component="h4" variant="h6">
               AI-assisted interpretation
             </Typography>
           </Stack>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75 }}>
             On demand, compact deterministic evidence is sent to the configured AI provider. Exact
             point coordinates are excluded, and AI does not create new measurements or forecasts.
             Provider retention and training policies may still apply.
@@ -89,6 +92,8 @@ export default function AIClimateExplanation({
           variant={state.status === "success" ? "outlined" : "contained"}
           onClick={explain}
           disabled={state.status === "loading"}
+          size="small"
+          sx={{ flexShrink: 0 }}
           startIcon={
             state.status === "loading" ? (
               <CircularProgress size={16} color="inherit" />
@@ -122,50 +127,68 @@ export default function AIClimateExplanation({
       )}
 
       {state.status === "success" && (
-        <Box aria-live="polite" sx={{ mt: 2 }}>
-          <Typography variant="h6">{state.response.data.explanation.headline}</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+        <Box aria-live="polite" sx={{ mt: 2.5 }}>
+          <Box sx={{ pl: 1.75, borderLeft: `2px solid ${colors.blue}` }}>
+            <Typography variant="overline" color="text.secondary">
+              Interpretation · verify before use
+            </Typography>
+            <Typography variant="h6" sx={{ mt: 0.25 }}>
+              {state.response.data.explanation.headline}
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.25, lineHeight: 1.65 }}>
             {state.response.data.explanation.overview}
           </Typography>
-          <Stack spacing={1.25} sx={{ mt: 2 }}>
-            {state.response.data.explanation.signalExplanations.map((explanation) => (
+          <Stack sx={{ mt: 2, borderBottom: `1px solid ${colors.line}` }}>
+            {state.response.data.explanation.signalExplanations.map((explanation, index) => (
               <Box
                 key={explanation.signalId}
-                sx={{ p: 1.5, borderLeft: `3px solid ${colors.blue}`, bgcolor: "#0D1012" }}
+                sx={{ py: 1.75, borderTop: `1px solid ${colors.line}` }}
               >
-                <Typography variant="subtitle2">What the signal means</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {explanation.meaning}
+                <Typography variant="overline" sx={{ color: colors.blue }}>
+                  Signal {String(index + 1).padStart(2, "0")}
                 </Typography>
-                <Typography variant="caption" sx={{ display: "block", mt: 0.75, color: colors.blueDark }}>
-                  Why it matters: {explanation.whyItMatters}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Verify next: {explanation.verifyNext}
-                </Typography>
+                <Stack spacing={1.1} sx={{ mt: 0.75 }}>
+                  <ResultField label="Meaning" value={explanation.meaning} />
+                  <ResultField label="Why it matters" value={explanation.whyItMatters} />
+                  <ResultField label="Verify next" value={explanation.verifyNext} accent />
+                </Stack>
               </Box>
             ))}
           </Stack>
-          <Typography variant="overline" color="text.secondary" sx={{ display: "block", mt: 2 }}>
-            Important limitations
-          </Typography>
-          <Stack component="ul" spacing={0.5} sx={{ pl: 2.5, my: 0 }}>
-            {state.response.data.explanation.caveats.map((caveat) => (
-              <Typography component="li" variant="caption" color="text.secondary" key={caveat}>
-                {caveat}
-              </Typography>
-            ))}
-          </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1.5 }}>
-            Generated by {state.response.meta.provider} · {state.response.meta.model}. AI text may
-            be incomplete; deterministic evidence and local verification remain authoritative.
+          <Box sx={{ mt: 2, py: 1.5, px: 1.75, bgcolor: "rgba(240,179,109,0.07)" }}>
+            <Typography variant="overline" sx={{ color: colors.amber }}>
+              Important limitations
+            </Typography>
+            <Stack component="ul" spacing={0.5} sx={{ pl: 2.25, my: 0.5 }}>
+              {state.response.data.explanation.caveats.map((caveat) => (
+                <Typography component="li" variant="caption" color="text.secondary" key={caveat}>
+                  {caveat}
+                </Typography>
+              ))}
+            </Stack>
+          </Box>
+          <Box
+            sx={{
+              mt: 1.5,
+              display: "grid",
+              gridTemplateColumns: "auto minmax(0, 1fr)",
+              columnGap: 1.5,
+              rowGap: 0.5,
+            }}
+          >
+            <ResultMeta label="Provider" value={state.response.meta.provider} />
+            <ResultMeta label="Model" value={state.response.meta.model} />
+          </Box>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+            AI text may be incomplete; deterministic evidence and local verification remain
+            authoritative.
           </Typography>
           {state.response.meta.provider === "OpenRouter" &&
             state.response.meta.model.endsWith(":free") && (
               <Typography
                 variant="caption"
-                color="warning.main"
-                sx={{ display: "block", mt: 0.5 }}
+                sx={{ display: "block", mt: 1, pl: 1.25, color: colors.amber, borderLeft: `2px solid ${colors.amber}` }}
               >
                 This free OpenRouter endpoint may log request content under its provider policy.
               </Typography>
@@ -173,6 +196,43 @@ export default function AIClimateExplanation({
         </Box>
       )}
     </Box>
+  )
+}
+
+function ResultField({
+  label,
+  value,
+  accent = false,
+}: {
+  label: string
+  value: string
+  accent?: boolean
+}) {
+  return (
+    <Box>
+      <Typography variant="caption" sx={{ color: accent ? colors.blueDark : "text.secondary" }}>
+        {label}
+      </Typography>
+      <Typography variant="body2" sx={{ mt: 0.15, lineHeight: 1.55 }}>
+        {value}
+      </Typography>
+    </Box>
+  )
+}
+
+function ResultMeta({ label, value }: { label: string; value: string }) {
+  return (
+    <>
+      <Typography variant="caption" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{ fontFamily: "var(--font-mono)", overflowWrap: "anywhere" }}
+      >
+        {value}
+      </Typography>
+    </>
   )
 }
 
